@@ -1,0 +1,10 @@
+[package]
+name = "criterion-forkjoin"
+version = "0.1.0"
+authors = ["Linus Färnstrand <faern@faern.net>"]
+
+[dependencies.criterion]
+git = "https://github.com/japaric/criterion.rs"
+
+[dependencies.forkjoin]
+path = "../forkjoin/"

@@ -1,0 +1,184 @@
+[root]
+name = "criterion-forkjoin"
+version = "0.1.0"
+dependencies = [
+ "criterion 0.0.0 (git+https://github.com/japaric/criterion.rs)",
+ "forkjoin 1.0.1",
+]
+
+[[package]]
+name = "approx"
+version = "0.0.0"
+source = "git+https://github.com/japaric/approx.rs#7f3d5147ffea4dbeef8b5861b54e05dc8daf9c1e"
+dependencies = [
+ "float 0.0.0 (git+https://github.com/japaric/float.rs)",
+]
+
+[[package]]
+name = "blas"
+version = "0.0.0"
+source = "git+https://github.com/japaric/blas.rs#41bb29b742548794df39328492f80bc10517416a"
+dependencies = [
+ "complex 0.0.0 (git+https://github.com/japaric/complex.rs)",
+]
+
+[[package]]
+name = "byteorder"
+version = "0.3.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
+name = "cast"
+version = "0.0.0"
+source = "git+https://github.com/japaric/cast.rs#34ee2159cc1276ecce7b8c521a81f47c907d2c63"
+
+[[package]]
+name = "complex"
+version = "0.0.0"
+source = "git+https://github.com/japaric/complex.rs#00bb0c7a2350dc2e0f2b4157ceed1f4595ec2570"
+dependencies = [
+ "approx 0.0.0 (git+https://github.com/japaric/approx.rs)",
+ "float 0.0.0 (git+https://github.com/japaric/float.rs)",
+ "onezero 0.0.0 (git+https://github.com/japaric/onezero.rs)",
+ "rand 0.3.8 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "criterion"
+version = "0.0.0"
+source = "git+https://github.com/japaric/criterion.rs#0a8b81460a3a983d8371882ac8a1e0192b56d4ed"
+dependencies = [
+ "criterion_macros 0.0.0 (git+https://github.com/japaric/criterion.rs)",
+ "log 0.3.1 (git+https://github.com/rust-lang/log)",
+ "rustc-serialize 0.3.14 (git+https://github.com/rust-lang/rustc-serialize)",
+ "simplot 0.0.0 (git+https://github.com/japaric/simplot.rs)",
+ "space 0.0.0 (git+https://github.com/japaric/space.rs)",
+ "stats 0.0.0 (git+https://github.com/japaric/stats.rs)",
+ "time 0.1.25 (git+https://github.com/rust-lang/time)",
+]
+
+[[package]]
+name = "criterion_macros"
+version = "0.0.0"
+source = "git+https://github.com/japaric/criterion.rs#0a8b81460a3a983d8371882ac8a1e0192b56d4ed"
+
+[[package]]
+name = "deque"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+dependencies = [
+ "rand 0.3.8 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "float"
+version = "0.0.0"
+source = "git+https://github.com/japaric/float.rs#6f1ad86a022bc1a80550b168a031d55ef09a0041"
+dependencies = [
+ "cast 0.0.0 (git+https://github.com/japaric/cast.rs)",
+]
+
+[[package]]
+name = "forkjoin"
+version = "1.0.1"
+dependencies = [
+ "deque 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "num_cpus 0.2.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rand 0.3.8 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "gcc"
+version = "0.3.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
+name = "libc"
+version = "0.1.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
+name = "log"
+version = "0.3.1"
+source = "git+https://github.com/rust-lang/log#e4136bb17c5117f8edefa3f9b8f4cbd5b19f1d5f"
+dependencies = [
+ "libc 0.1.6 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "num_cpus"
+version = "0.2.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+dependencies = [
+ "libc 0.1.6 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "onezero"
+version = "0.0.0"
+source = "git+https://github.com/japaric/onezero.rs#25aa543e559db3b49c786aaf4e3a8f286cac3f65"
+
+[[package]]
+name = "rand"
+version = "0.3.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+dependencies = [
+ "libc 0.1.6 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "rustc-serialize"
+version = "0.3.14"
+source = "git+https://github.com/rust-lang/rustc-serialize#bb395dea75601659a9c70f1fed26812dd8ddb684"
+
+[[package]]
+name = "simd"
+version = "0.0.0"
+source = "git+https://github.com/japaric/simd.rs#795bcb2e850835e80fe8babacc9acd76c002b31f"
+
+[[package]]
+name = "simplot"
+version = "0.0.0"
+source = "git+https://github.com/japaric/simplot.rs#c62e83082c8426c4c8d7d29a014a5a743f29d294"
+dependencies = [
+ "byteorder 0.3.9 (registry+https://github.com/rust-lang/crates.io-index)",
+ "cast 0.0.0 (git+https://github.com/japaric/cast.rs)",
+ "zip 0.0.0 (git+https://github.com/japaric/zip.rs)",
+]
+
+[[package]]
+name = "space"
+version = "0.0.0"
+source = "git+https://github.com/japaric/space.rs#134cba051e5c7222c7624447b21eeaf8a5556f55"
+dependencies = [
+ "cast 0.0.0 (git+https://github.com/japaric/cast.rs)",
+ "float 0.0.0 (git+https://github.com/japaric/float.rs)",
+]
+
+[[package]]
+name = "stats"
+version = "0.0.0"
+source = "git+https://github.com/japaric/stats.rs#0a87100bf6f1a9ee4ef738714717823697852959"
+dependencies = [
+ "blas 0.0.0 (git+https://github.com/japaric/blas.rs)",
+ "cast 0.0.0 (git+https://github.com/japaric/cast.rs)",
+ "float 0.0.0 (git+https://github.com/japaric/float.rs)",
+ "num_cpus 0.2.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rand 0.3.8 (registry+https://github.com/rust-lang/crates.io-index)",
+ "simd 0.0.0 (git+https://github.com/japaric/simd.rs)",
+]
+
+[[package]]
+name = "time"
+version = "0.1.25"
+source = "git+https://github.com/rust-lang/time#4a4faa0f0a92257d7f6b34f7627e355734ba803c"
+dependencies = [
+ "gcc 0.3.5 (registry+https://github.com/rust-lang/crates.io-index)",
+ "libc 0.1.6 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "zip"
+version = "0.0.0"
+source = "git+https://github.com/japaric/zip.rs#393037bc84650b5885e8b532dfe0362e4fbcc0e7"
+
