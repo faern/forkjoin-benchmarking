@@ -2,7 +2,7 @@
 name = "criterion-forkjoin"
 version = "0.1.0"
 dependencies = [
- "criterion 0.0.0 (git+https://github.com/japaric/criterion.rs)",
+ "criterion 0.0.0",
  "forkjoin 1.0.1",
 ]
 
@@ -46,9 +46,8 @@ dependencies = [
 [[package]]
 name = "criterion"
 version = "0.0.0"
-source = "git+https://github.com/japaric/criterion.rs#0a8b81460a3a983d8371882ac8a1e0192b56d4ed"
 dependencies = [
- "criterion_macros 0.0.0 (git+https://github.com/japaric/criterion.rs)",
+ "criterion_macros 0.0.0",
  "log 0.3.1 (git+https://github.com/rust-lang/log)",
  "rustc-serialize 0.3.14 (git+https://github.com/rust-lang/rustc-serialize)",
  "simplot 0.0.0 (git+https://github.com/japaric/simplot.rs)",
@@ -60,7 +59,6 @@ dependencies = [
 [[package]]
 name = "criterion_macros"
 version = "0.0.0"
-source = "git+https://github.com/japaric/criterion.rs#0a8b81460a3a983d8371882ac8a1e0192b56d4ed"
 
 [[package]]
 name = "deque"

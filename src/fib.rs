@@ -1,20 +1,29 @@
-
+use std::fmt;
 use criterion::Bencher;
 use forkjoin::{TaskResult,ForkPool,AlgoStyle,SummaStyle,Algorithm};
 
-pub fn parfib(b: &mut Bencher, &size: &usize) {
-    let forkpool = ForkPool::with_threads(4);
-    let fibpool = forkpool.init_algorithm(FIB);
+pub struct FibData(pub usize, pub usize);
 
-    b.iter(|| {
-        let job = fibpool.schedule(size);
+impl fmt::Display for FibData {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "t{}-i{}", self.0, self.1)
+    }
+}
+
+
+pub fn parfib(b: &mut Bencher, d: &FibData) {
+    b.iter_with_setup(|| {
+        ForkPool::with_threads(d.0)
+    }, |forkpool| {
+        let fibpool = forkpool.init_algorithm(FIB);
+        let job = fibpool.schedule(d.1);
         job.recv().unwrap()
     })
 }
 
-pub fn seqfib(b: &mut Bencher, &size: &usize) {
-    b.iter(|| {
-        fib(size)
+pub fn seqfib(b: &mut Bencher, &i: &usize) {
+    b.iter_with_large_drop(|| {
+        fib(i)
     })
 }
 
