@@ -1,22 +1,32 @@
-use std::fmt;
 use criterion::Bencher;
 use forkjoin::{TaskResult,ForkPool,AlgoStyle,SummaStyle,Algorithm};
 
-pub struct FibData(pub usize, pub usize);
-
-impl fmt::Display for FibData {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "t{}-i{}", self.0, self.1)
-    }
-}
-
-
-pub fn parfib(b: &mut Bencher, d: &FibData) {
+pub fn parfib_t1(b: &mut Bencher, &i: &usize) {
     b.iter_with_setup(|| {
-        ForkPool::with_threads(d.0)
+        ForkPool::with_threads(1)
     }, |forkpool| {
         let fibpool = forkpool.init_algorithm(FIB);
-        let job = fibpool.schedule(d.1);
+        let job = fibpool.schedule(i);
+        job.recv().unwrap()
+    })
+}
+
+pub fn parfib_t4(b: &mut Bencher, &i: &usize) {
+    b.iter_with_setup(|| {
+        ForkPool::with_threads(4)
+    }, |forkpool| {
+        let fibpool = forkpool.init_algorithm(FIB);
+        let job = fibpool.schedule(i);
+        job.recv().unwrap()
+    })
+}
+
+pub fn parfib_i30(b: &mut Bencher, &t: &usize) {
+    b.iter_with_setup(|| {
+        ForkPool::with_threads(t)
+    }, |forkpool| {
+        let fibpool = forkpool.init_algorithm(FIB);
+        let job = fibpool.schedule(30);
         job.recv().unwrap()
     })
 }

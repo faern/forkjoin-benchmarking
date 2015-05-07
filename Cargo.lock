@@ -3,7 +3,7 @@ name = "criterion-forkjoin"
 version = "0.1.0"
 dependencies = [
  "criterion 0.0.0",
- "forkjoin 1.0.1",
+ "forkjoin 2.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -17,7 +17,7 @@ dependencies = [
 [[package]]
 name = "blas"
 version = "0.0.0"
-source = "git+https://github.com/japaric/blas.rs#41bb29b742548794df39328492f80bc10517416a"
+source = "git+https://github.com/japaric/blas.rs#93e246a46ff2df8523eb9ff8ce8f324b0056aab1"
 dependencies = [
  "complex 0.0.0 (git+https://github.com/japaric/complex.rs)",
 ]
@@ -78,10 +78,11 @@ dependencies = [
 
 [[package]]
 name = "forkjoin"
-version = "1.0.1"
+version = "2.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "deque 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "num_cpus 0.2.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "num_cpus 0.2.4 (registry+https://github.com/rust-lang/crates.io-index)",
  "rand 0.3.8 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
@@ -105,7 +106,7 @@ dependencies = [
 
 [[package]]
 name = "num_cpus"
-version = "0.2.3"
+version = "0.2.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "libc 0.1.6 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -127,7 +128,7 @@ dependencies = [
 [[package]]
 name = "rustc-serialize"
 version = "0.3.14"
-source = "git+https://github.com/rust-lang/rustc-serialize#bb395dea75601659a9c70f1fed26812dd8ddb684"
+source = "git+https://github.com/rust-lang/rustc-serialize#36910088d77bcbb63cd56e7660626f06da3ac0df"
 
 [[package]]
 name = "simd"
@@ -161,7 +162,7 @@ dependencies = [
  "blas 0.0.0 (git+https://github.com/japaric/blas.rs)",
  "cast 0.0.0 (git+https://github.com/japaric/cast.rs)",
  "float 0.0.0 (git+https://github.com/japaric/float.rs)",
- "num_cpus 0.2.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "num_cpus 0.2.4 (registry+https://github.com/rust-lang/crates.io-index)",
  "rand 0.3.8 (registry+https://github.com/rust-lang/crates.io-index)",
  "simd 0.0.0 (git+https://github.com/japaric/simd.rs)",
 ]
@@ -169,7 +170,7 @@ dependencies = [
 [[package]]
 name = "time"
 version = "0.1.25"
-source = "git+https://github.com/rust-lang/time#4a4faa0f0a92257d7f6b34f7627e355734ba803c"
+source = "git+https://github.com/rust-lang/time#d66fc66eb1422131de0a3b1a45229e3de15fc7c1"
 dependencies = [
  "gcc 0.3.5 (registry+https://github.com/rust-lang/crates.io-index)",
  "libc 0.1.6 (registry+https://github.com/rust-lang/crates.io-index)",
