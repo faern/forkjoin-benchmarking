@@ -3,12 +3,17 @@ name = "criterion-forkjoin"
 version = "0.1.0"
 authors = ["Linus Färnstrand <faern@faern.net>"]
 
-[dependencies]
-forkjoin = "2.*"
+# [dependencies]
+# forkjoin = "2.*"
 
 [dependencies.criterion]
 # git = "https://github.com/faern/criterion.rs"
 path = "../criterion.rs/"
 
-# [dependencies.forkjoin]
-# path = "../forkjoin/"
+[dependencies.forkjoin]
+path = "../forkjoin.v2/"
+
+[profile.release]
+opt-level = 3
+debug = false
+lto = true

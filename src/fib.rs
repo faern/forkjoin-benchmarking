@@ -21,6 +21,7 @@ pub fn parfib_t4(b: &mut Bencher, &i: &usize) {
     })
 }
 
+
 pub fn parfib_i30(b: &mut Bencher, &t: &usize) {
     b.iter_with_setup(|| {
         ForkPool::with_threads(t)

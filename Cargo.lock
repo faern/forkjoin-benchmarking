@@ -3,7 +3,7 @@ name = "criterion-forkjoin"
 version = "0.1.0"
 dependencies = [
  "criterion 0.0.0",
- "forkjoin 2.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "forkjoin 2.0.0",
 ]
 
 [[package]]
@@ -79,7 +79,6 @@ dependencies = [
 [[package]]
 name = "forkjoin"
 version = "2.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "deque 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "num_cpus 0.2.4 (registry+https://github.com/rust-lang/crates.io-index)",
