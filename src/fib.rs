@@ -1,40 +1,20 @@
 use criterion::Bencher;
 use forkjoin::{TaskResult,ForkPool,AlgoStyle,SummaStyle,Algorithm};
-
-pub fn parfib_t1(b: &mut Bencher, &i: &usize) {
-    b.iter_with_setup(|| {
-        ForkPool::with_threads(1)
-    }, |forkpool| {
-        let fibpool = forkpool.init_algorithm(FIB);
-        let job = fibpool.schedule(i);
-        job.recv().unwrap()
-    })
-}
-
-pub fn parfib_t4(b: &mut Bencher, &i: &usize) {
-    b.iter_with_setup(|| {
-        ForkPool::with_threads(4)
-    }, |forkpool| {
-        let fibpool = forkpool.init_algorithm(FIB);
-        let job = fibpool.schedule(i);
-        job.recv().unwrap()
-    })
-}
-
-
-pub fn parfib_i30(b: &mut Bencher, &t: &usize) {
-    b.iter_with_setup(|| {
-        ForkPool::with_threads(t)
-    }, |forkpool| {
-        let fibpool = forkpool.init_algorithm(FIB);
-        let job = fibpool.schedule(30);
-        job.recv().unwrap()
-    })
-}
+use test;
 
 pub fn seqfib(b: &mut Bencher, &i: &usize) {
     b.iter_with_large_drop(|| {
-        fib(i)
+        fib(test::black_box(i))
+    })
+}
+
+pub fn parfib(b: &mut Bencher, threads: usize, &i: &usize) {
+    let forkpool = ForkPool::with_threads(threads);
+    let fibpool = forkpool.init_algorithm(FIB);
+
+    b.iter_with_large_drop(|| {
+        let job = fibpool.schedule(i);
+        job.recv().unwrap()
     })
 }
 
