@@ -1,5 +1,5 @@
 [package]
-name = "criterion-forkjoin"
+name = "forkjoin-benchmarking"
 version = "0.1.0"
 authors = ["Linus Färnstrand <faern@faern.net>"]
 
