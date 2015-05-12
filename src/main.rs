@@ -118,7 +118,7 @@ fn bench_nqueens_summa(criterion: &mut Criterion, args: &[usize], threads: &[usi
             funs.push(Fun::new(&format!("T{}", t), move |b,i| par_nqueens_summa(b, t, i)));
         }
 
-        criterion.bench_compare_implementations(&format!("nqueens_{}", arg), funs, arg);
+        criterion.bench_compare_implementations(&format!("nqueens_summa_{}", arg), funs, arg);
     }
 }
 
