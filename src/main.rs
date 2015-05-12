@@ -1,6 +1,7 @@
 //#![feature(std_misc)] // For Duration
 #![feature(test)]
 #![feature(scoped)]
+#![feature(collections)]
 
 extern crate test;
 extern crate criterion;
@@ -9,6 +10,7 @@ extern crate forkjoin;
 
 mod fib;
 mod quicksort;
+mod nqueens;
 // mod sumtree;
 
 //use std::time::duration::Duration;
@@ -20,6 +22,7 @@ use std::convert::AsRef;
 
 use fib::{seqfib, parfib, seqfib_spam};
 use quicksort::{create_vec_rnd, seq_qsort, par_qsort};
+use nqueens::{seq_nqueens_summa, par_nqueens_summa};
 // use quicksort::{seq_qsort_sorted, par_qsort_t1_sorted, par_qsort_t4_sorted};
 // use quicksort::{seq_qsort_rnd, par_qsort_t1_rnd, par_qsort_t4_rnd};
 // use sumtree::{seq_sumtree_balanced, par_sumtree_balanced_t1, par_sumtree_balanced_t4};
@@ -28,8 +31,9 @@ use quicksort::{create_vec_rnd, seq_qsort, par_qsort};
 fn main() {
     let mut samples: usize = 25;
     let mut threads: Vec<usize> = vec![1,2,4];
-    let mut fibargs: Vec<usize> = vec![31];
-    let mut qsortargs: Vec<usize> = vec![0, 20000];
+    let mut fib_args: Vec<usize> = vec![31];
+    let mut qsort_args: Vec<usize> = vec![0, 20000];
+    let mut nqueens_args: Vec<usize> = vec![8];
     let mut functions: Vec<String> = vec![];
 
     {  // this block limits scope of borrows by ap.refer() method
@@ -38,8 +42,9 @@ fn main() {
 
         ap.refer(&mut samples).add_option(&["-s", "--samples"], Store, "Number of samples to collect for each benchmark");
         ap.refer(&mut threads).add_option(&["-t", "--threads"], List, "Number of threads to run on");
-        ap.refer(&mut fibargs).add_option(&["--fib"], List, "Arguments to fib");
-        ap.refer(&mut qsortargs).add_option(&["--qsort"], List, "Size of lists to sort by quicksort");
+        ap.refer(&mut fib_args).add_option(&["--fib"], List, "Arguments to fib");
+        ap.refer(&mut qsort_args).add_option(&["--qsort"], List, "Size of lists to sort by quicksort");
+        ap.refer(&mut nqueens_args).add_option(&["--nqueens"], List, "Size of chessboard");
         ap.refer(&mut functions).add_argument("functions", List, "List of functions to benchmark").required();
 
         ap.parse_args_or_exit();
@@ -47,21 +52,23 @@ fn main() {
     println!("==================================");
     println!("Number of samples: {}", samples);
     println!("Threads: {:?}", threads);
-    println!("Fib arguments: {:?}", fibargs);
+    println!("Fib arguments: {:?}", fib_args);
+    println!("Quicksort arguments: {:?}", qsort_args);
+    println!("Nqueens arguments: {:?}", nqueens_args);
     println!("Benchmarked functions: {:?}", functions);
     println!("==================================");
 
     // let sumtree_data = vec![0, 10, 14, 18];
-    // let qsortdata = vec![0, 1000, 5000, 10000];
 
     let mut criterion = Criterion::default();
     criterion.sample_size(samples);
 
     for function in functions {
         match function.as_ref() {
-            "fib" => bench_fib(&mut criterion, &fibargs, &threads),
-            "seqfib_spam" => bench_seqfib_spam(&mut criterion, &fibargs, &threads),
-            "qsort" => bench_qsort(&mut criterion, &qsortargs, &threads),
+            "fib" => bench_fib(&mut criterion, &fib_args, &threads),
+            "seqfib_spam" => bench_seqfib_spam(&mut criterion, &fib_args, &threads),
+            "qsort" => bench_qsort(&mut criterion, &qsort_args, &threads),
+            "nqueens_summa" => bench_nqueens_summa(&mut criterion, &nqueens_args, &threads),
             other => panic!("Invalid function to benchmark: {}", other),
         }
     }
@@ -100,6 +107,18 @@ fn bench_qsort(criterion: &mut Criterion, args: &[usize], threads: &[usize]) {
         }
 
         criterion.bench_compare_implementations(&format!("qsort_{}", arg), funs, arg);
+    }
+}
+
+fn bench_nqueens_summa(criterion: &mut Criterion, args: &[usize], threads: &[usize]) {
+    for arg in args {
+        let mut funs: Vec<Fun<usize>> = Vec::new();
+        funs.push(Fun::new("seq", move |b,i| seq_nqueens_summa(b, i)));
+        for &t in threads.iter() {
+            funs.push(Fun::new(&format!("T{}", t), move |b,i| par_nqueens_summa(b, t, i)));
+        }
+
+        criterion.bench_compare_implementations(&format!("nqueens_{}", arg), funs, arg);
     }
 }
 
