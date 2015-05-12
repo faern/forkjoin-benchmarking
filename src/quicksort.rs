@@ -1,91 +1,76 @@
 use criterion::Bencher;
 use forkjoin::{TaskResult,ForkPool,AlgoStyle,SummaStyle,Algorithm};
+use std::mem;
 
-pub fn seq_qsort_sorted(b: &mut Bencher, &size: &usize) {
-    seq_qsort(b, move || (0..size).collect::<Vec<usize>>());
-}
-
-pub fn par_qsort_t1_sorted(b: &mut Bencher, &size: &usize) {
-    par_qsort(b, 1, move || (0..size).collect::<Vec<usize>>());
-}
-
-pub fn par_qsort_t4_sorted(b: &mut Bencher, &size: &usize) {
-    par_qsort(b, 4, move || (0..size).collect::<Vec<usize>>());
-}
-
-
-pub fn seq_qsort_rnd(b: &mut Bencher, &size: &usize) {
-    seq_qsort(b, move || create_vec_rnd(893475343, size));
-}
-
-pub fn par_qsort_t1_rnd(b: &mut Bencher, &size: &usize) {
-    par_qsort(b, 1, move || create_vec_rnd(893475343, size));
-}
-
-pub fn par_qsort_t4_rnd(b: &mut Bencher, &size: &usize) {
-    par_qsort(b, 4, move || create_vec_rnd(893475343, size));
-}
-
-
-fn par_qsort<F>(b: &mut Bencher, threads: usize, datafun: F) where
-    F: Fn() -> Vec<usize>
+pub fn par_qsort<F>(b: &mut Bencher, threads: usize, size: usize, datafun: F) where
+    F: Fn(&mut [usize])
 {
+    let mut data: Vec<usize> = (0..size).collect();
+    let mut data_bench: Vec<usize> = unsafe { Vec::from_raw_parts(data.as_mut_ptr(), data.len(), data.capacity()) };
+    let mut data_verify: Vec<usize> = unsafe { Vec::from_raw_parts(data.as_mut_ptr(), data.len(), data.capacity()) };
+
     b.iter_with_setup_and_verify(|| {
-        datafun()
-    }, |mut data| {
-        {
-            let forkpool = ForkPool::with_threads(threads);
-            let sortpool = forkpool.init_algorithm(Algorithm {
-                fun: quicksort_task,
-                style: AlgoStyle::Summa(SummaStyle::NoArg(quicksort_join)),
-            });
-            let job = sortpool.schedule(&mut data[..]);
-            job.recv().unwrap()
-        }
-        data
-    }, |data| {
-        verify_sorted(data);
+        datafun(&mut data[..]);
+    }, |()| {
+        let forkpool = ForkPool::with_threads(threads);
+        let sortpool = forkpool.init_algorithm(Algorithm {
+            fun: quicksort_task,
+            style: AlgoStyle::Summa(SummaStyle::NoArg(quicksort_join)),
+        });
+        let job = sortpool.schedule(&mut data_bench[..]);
+        job.recv().unwrap()
+    }, |()| {
+        verify_sorted(&mut data_verify[..]);
     });
+
+    mem::forget(data_bench);
+    mem::forget(data_verify);
 }
 
-fn seq_qsort<F>(b: &mut Bencher, datafun: F) where
-    F: Fn() -> Vec<usize>
+pub fn seq_qsort<F>(b: &mut Bencher, size: usize, datafun: F) where
+    F: Fn(&mut [usize])
 {
+    let mut data: Vec<usize> = (0..size).collect();
+    let mut data_bench: Vec<usize> = unsafe { Vec::from_raw_parts(data.as_mut_ptr(), data.len(), data.capacity()) };
+    let mut data_verify: Vec<usize> = unsafe { Vec::from_raw_parts(data.as_mut_ptr(), data.len(), data.capacity()) };
+
     b.iter_with_setup_and_verify(|| {
-        datafun()
-    }, |mut data| {
-        quicksort_seq(&mut data[..]);
-        data
-    }, |data| {
-        verify_sorted(data);
+        datafun(&mut data[..]);
+    }, |()| {
+        quicksort_seq(&mut data_bench[..]);
+    }, |()| {
+        verify_sorted(&mut data_verify[..]);
     });
+
+    mem::forget(data_bench);
+    mem::forget(data_verify);
 }
 
-fn verify_sorted(data: Vec<usize>) {
+fn verify_sorted(data: &[usize]) {
     if data.len() > 0 {
         let mut last = data[0];
         for d in data {
-            assert!(last <= d);
-            last = d;
+            assert!(last <= *d);
+            last = *d;
         }
     }
 }
 
-fn create_vec_rnd(mut x: usize, n: usize) -> Vec<usize> {
-    let mut d: Vec<usize> = Vec::with_capacity(n);
+pub fn create_vec_rnd(mut x: usize, d: &mut [usize]) {
     let mut i = 0;
+    let n = d.len();
     while i < n {
         let num = (i * n ^ x) % n;
-        d.push(num);
+        d[i] = num;
         x ^= i*num;
         i += 1;
     }
-    d
 }
 
 fn quicksort_task(d: &mut [usize]) -> TaskResult<&mut [usize], ()> {
     let len = d.len();
-    if len <= 1 {
+    if len <= 100 {
+        quicksort_seq(d);
         TaskResult::Done(())
     } else {
         let pivot = partition(d);
