@@ -11,10 +11,8 @@ extern crate forkjoin;
 mod fib;
 mod quicksort;
 mod nqueens;
-// mod sumtree;
+mod sumtree;
 mod spawnpool;
-
-//use std::time::duration::Duration;
 
 use criterion::{Criterion,Fun};
 
@@ -25,6 +23,7 @@ use fib::{seqfib, parfib, seqfib_spam};
 use quicksort::{create_vec_rnd, seq_qsort, par_qsort};
 use nqueens::{seq_nqueens_summa, par_nqueens_summa};
 use spawnpool::{spawn, spawn_drop, spawn_schedule_drop};
+use sumtree::{gen_unbalanced_tree, seq_sumtree, par_sumtree};
 
 // use sumtree::{seq_sumtree_balanced, par_sumtree_balanced_t1, par_sumtree_balanced_t4};
 // use sumtree::{seq_sumtree_unbalanced, par_sumtree_unbalanced_t1, par_sumtree_unbalanced_t4};
@@ -35,6 +34,8 @@ fn main() {
     let mut fib_args: Vec<usize> = vec![31];
     let mut qsort_args: Vec<usize> = vec![0, 20000];
     let mut nqueens_args: Vec<usize> = vec![8];
+    let mut sumtree_args: Vec<usize> = vec![12];
+
     let mut functions: Vec<String> = vec![];
 
     {  // this block limits scope of borrows by ap.refer() method
@@ -46,6 +47,7 @@ fn main() {
         ap.refer(&mut fib_args).add_option(&["--fib"], List, "Arguments to fib");
         ap.refer(&mut qsort_args).add_option(&["--qsort"], List, "Size of lists to sort by quicksort");
         ap.refer(&mut nqueens_args).add_option(&["--nqueens"], List, "Size of chessboard");
+        ap.refer(&mut sumtree_args).add_option(&["--sumtree"], List, "Depth of tree in sumtree");
         ap.refer(&mut functions).add_argument("functions", List, "List of functions to benchmark").required();
 
         ap.parse_args_or_exit();
@@ -56,10 +58,9 @@ fn main() {
     println!("Fib arguments: {:?}", fib_args);
     println!("Quicksort arguments: {:?}", qsort_args);
     println!("Nqueens arguments: {:?}", nqueens_args);
+    println!("Sumtree depths: {:?}", sumtree_args);
     println!("Benchmarked functions: {:?}", functions);
     println!("==================================");
-
-    // let sumtree_data = vec![0, 10, 14, 18];
 
     let mut criterion = Criterion::default();
     criterion.sample_size(samples);
@@ -73,6 +74,7 @@ fn main() {
             "seqfib_spam" => bench_seqfib_spam(&mut criterion, &fib_args, &threads),
             "qsort" => bench_qsort(&mut criterion, &qsort_args, &threads),
             "nqueens_summa" => bench_nqueens_summa(&mut criterion, &nqueens_args, &threads),
+            "sumtree" => bench_sumtree(&mut criterion, &sumtree_args, &threads),
             other => panic!("Invalid function to benchmark: {}", other),
         }
     }
@@ -153,14 +155,18 @@ fn bench_nqueens_summa(criterion: &mut Criterion, args: &[usize], threads: &[usi
     }
 }
 
-        // .bench_with_inputs("seq_sumtree_unbalanced", seq_sumtree_unbalanced, sumtree_data.clone())
-        // .bench_with_inputs("par_sumtree_unbalanced_t1", par_sumtree_unbalanced_t1, sumtree_data.clone())
-        // .bench_with_inputs("par_sumtree_unbalanced_t4", par_sumtree_unbalanced_t4, sumtree_data.clone())
+fn bench_sumtree(criterion: &mut Criterion, args: &[usize], threads: &[usize]) {
+    for arg in args {
+        let tree = gen_unbalanced_tree(*arg);
+        let tree2 = tree.clone();
 
-        // .bench_with_inputs("seq_sumtree_balanced", seq_sumtree_balanced, sumtree_data.clone())
-        // .bench_with_inputs("par_sumtree_balanced_t1", par_sumtree_balanced_t1, sumtree_data.clone())
-        // .bench_with_inputs("par_sumtree_balanced_t4", par_sumtree_balanced_t4, sumtree_data.clone())
+        let mut funs: Vec<Fun<usize>> = Vec::new();
+        funs.push(Fun::new("seq", move |b,_| seq_sumtree(b, &tree2)));
+        for &t in threads.iter() {
+            let tree_clone = tree.clone();
+            funs.push(Fun::new(&format!("T{}", t), move |b,_| par_sumtree(b, t, &tree_clone)));
+        }
 
-        // .bench_with_inputs("seq_qsort_sorted", seq_qsort_sorted, qsortdata.clone())
-        // .bench_with_inputs("par_qsort_t1_sorted", par_qsort_t1_sorted, qsortdata.clone())
-        // .bench_with_inputs("par_qsort_t4_sorted", par_qsort_t4_sorted, qsortdata.clone())
+        criterion.bench_compare_implementations(&format!("sumtree_{}", arg), funs, arg);
+    }
+}

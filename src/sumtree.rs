@@ -1,51 +1,14 @@
 use criterion::Bencher;
 use forkjoin::{TaskResult,ForkPool,AlgoStyle,SummaStyle,Algorithm};
-use std::mem;
+use test;
 
-pub fn seq_sumtree_balanced(b: &mut Bencher, &i: &usize) {
-    seq_sumtree(b, || gen_balanced_tree(i));
-}
-
-pub fn par_sumtree_balanced_t1(b: &mut Bencher, &i: &usize) {
-    par_sumtree(b, 1, || gen_balanced_tree(i));
-}
-
-pub fn par_sumtree_balanced_t4(b: &mut Bencher, &i: &usize) {
-    par_sumtree(b, 4, || gen_balanced_tree(i));
-}
-
-pub fn seq_sumtree_unbalanced(b: &mut Bencher, &i: &usize) {
-    seq_sumtree(b, || gen_unbalanced_tree(i));
-}
-
-pub fn par_sumtree_unbalanced_t1(b: &mut Bencher, &i: &usize) {
-    par_sumtree(b, 1, || gen_unbalanced_tree(i));
-}
-
-pub fn par_sumtree_unbalanced_t4(b: &mut Bencher, &i: &usize) {
-    par_sumtree(b, 4, || gen_unbalanced_tree(i));
-}
-
-#[inline]
-fn seq_sumtree<F>(b: &mut Bencher, treegen: F) where
-    F: Fn() -> Tree
-{
-    // let tree = treegen();
-    // let expected_sum = sum_tree_seq(&tree);
-    b.iter_with_setup(|| {
-        treegen()
-    }, |tree| {
-        sum_tree_seq(&tree)
+pub fn seq_sumtree(b: &mut Bencher, tree: &Tree) {
+    b.iter(|| {
+        sum_tree_seq(test::black_box(tree))
     });
 }
 
-#[inline]
-fn par_sumtree<F>(b: &mut Bencher, threads: usize, treegen: F) where
-    F: Fn() -> Tree
-{
-    let tree = treegen();
-    let expected_sum = sum_tree_seq(&tree);
-
+pub fn par_sumtree(b: &mut Bencher, threads: usize, tree: &Tree) {
     let forkpool = ForkPool::with_threads(threads);
     let sumpool = forkpool.init_algorithm(Algorithm {
         fun: sum_tree_task,
@@ -53,23 +16,29 @@ fn par_sumtree<F>(b: &mut Bencher, threads: usize, treegen: F) where
     });
 
     b.iter(|| {
-        let job = sumpool.schedule(&tree);
+        let job = sumpool.schedule(test::black_box(tree));
         job.recv().unwrap()
     });
 }
 
 #[derive(Debug)]
-struct Tree {
+pub struct Tree {
     value: usize,
     children: Vec<Tree>,
 }
+impl Clone for Tree {
+    fn clone(&self) -> Tree {
+        Tree {
+            value: self.value,
+            children: self.children.iter().map(|t| t.clone()).collect(),
+        }
+    }
+}
 
-#[inline]
 fn sum_tree_seq(t: &Tree) -> usize {
     t.value + t.children.iter().fold(0, |acc, t2| acc + sum_tree_seq(t2))
 }
 
-#[inline]
 fn sum_tree_task(t: &Tree) -> TaskResult<&Tree, usize> {
     let val = t.value;
 
@@ -84,14 +53,12 @@ fn sum_tree_task(t: &Tree) -> TaskResult<&Tree, usize> {
     }
 }
 
-#[inline]
 fn sum_tree_join(value: &usize, values: &[usize]) -> usize {
     *value + values.iter().fold(0, |acc, &v| acc + v)
 }
 
 /// Generate a very unbalanced tree
-#[inline]
-fn gen_unbalanced_tree(depth: usize) -> Tree {
+pub fn gen_unbalanced_tree(depth: usize) -> Tree {
     let mut children = vec![];
     for i in 0..depth {
         children.push(gen_unbalanced_tree(i));
@@ -102,7 +69,6 @@ fn gen_unbalanced_tree(depth: usize) -> Tree {
     }
 }
 
-#[inline]
 fn gen_balanced_tree(depth: usize) -> Tree {
     let mut children = vec![];
     if depth > 0 {
