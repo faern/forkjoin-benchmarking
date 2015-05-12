@@ -36,7 +36,7 @@ pub fn parfib(b: &mut Bencher, threads: usize, &i: &usize) {
     let fibpool = forkpool.init_algorithm(FIB);
 
     b.iter_with_large_drop(|| {
-        let job = fibpool.schedule(i);
+        let job = fibpool.schedule(test::black_box(i));
         job.recv().unwrap()
     })
 }
@@ -47,7 +47,7 @@ const FIB: Algorithm<usize, usize> = Algorithm {
 };
 
 fn fib_task(n: usize) -> TaskResult<usize, usize> {
-    if n < 10 {
+    if n <= 20 {
         TaskResult::Done(fib(n))
     } else {
         TaskResult::Fork(vec![n-1,n-2], None)
