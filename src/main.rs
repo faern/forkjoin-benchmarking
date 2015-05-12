@@ -79,7 +79,7 @@ fn bench_seqfib_spam(criterion: &mut Criterion, fibargs: &[usize], threads: &[us
     for fibarg in fibargs {
         let mut fibfuns: Vec<Fun<usize>> = Vec::new();
         for &t in threads.iter() {
-            fibfuns.push(Fun::new(&format!("seqfib_on_{}_threads", t), move |b,i| seqfib_spam(b, t, i)));
+            fibfuns.push(Fun::new(&format!("T{}", t), move |b,i| seqfib_spam(b, t, i)));
         }
 
         criterion.bench_compare_implementations(&format!("seqfib_spam_{}", fibarg), fibfuns, fibarg);
