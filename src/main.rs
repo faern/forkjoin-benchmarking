@@ -1,5 +1,6 @@
 //#![feature(std_misc)] // For Duration
 #![feature(test)]
+#![feature(scoped)]
 
 extern crate test;
 extern crate criterion;
@@ -17,7 +18,7 @@ use criterion::{Criterion,Fun};
 use argparse::{ArgumentParser,Store,List};
 use std::convert::AsRef;
 
-use fib::{seqfib, parfib};
+use fib::{seqfib, parfib, seqfib_spam};
 // use quicksort::{seq_qsort_sorted, par_qsort_t1_sorted, par_qsort_t4_sorted};
 // use quicksort::{seq_qsort_rnd, par_qsort_t1_rnd, par_qsort_t4_rnd};
 // use sumtree::{seq_sumtree_balanced, par_sumtree_balanced_t1, par_sumtree_balanced_t4};
@@ -56,6 +57,7 @@ fn main() {
     for function in functions {
         match function.as_ref() {
             "fib" => bench_fib(&mut criterion, &fibargs, &threads),
+            "seqfib_spam" => bench_seqfib_spam(&mut criterion, &fibargs, &threads),
             other => panic!("Invalid function to benchmark: {}", other),
         }
     }
@@ -70,6 +72,17 @@ fn bench_fib(criterion: &mut Criterion, fibargs: &[usize], threads: &[usize]) {
         }
 
         criterion.bench_compare_implementations(&format!("fib_{}", fibarg), fibfuns, fibarg);
+    }
+}
+
+fn bench_seqfib_spam(criterion: &mut Criterion, fibargs: &[usize], threads: &[usize]) {
+    for fibarg in fibargs {
+        let mut fibfuns: Vec<Fun<usize>> = Vec::new();
+        for &t in threads.iter() {
+            fibfuns.push(Fun::new(&format!("seqfib_on_{}_threads", t), move |b,i| seqfib_spam(b, t, i)));
+        }
+
+        criterion.bench_compare_implementations(&format!("seqfib_spam_{}", fibarg), fibfuns, fibarg);
     }
 }
 

@@ -2,6 +2,29 @@ use criterion::Bencher;
 use forkjoin::{TaskResult,ForkPool,AlgoStyle,SummaStyle,Algorithm};
 use test;
 
+use std::thread::{self,JoinGuard};
+
+pub fn seqfib_spam(b: &mut Bencher, threads: usize, &i: &usize) {
+    let expected_result = fib(i);
+
+    b.iter_with_setup_and_verify(|| {}, |()| {
+        let joins = (0..threads).map(|_| {
+            thread::scoped(move || {
+                fib(test::black_box(i))
+            })
+        }).collect::<Vec<JoinGuard<usize>>>();
+
+        joins.into_iter().map(|join| {
+            join.join()
+        }).collect::<Vec<usize>>()
+    }, |results| {
+        assert_eq!(threads, results.len());
+        for result in results {
+            assert_eq!(expected_result, result);
+        }
+    });
+}
+
 pub fn seqfib(b: &mut Bencher, &i: &usize) {
     b.iter_with_large_drop(|| {
         fib(test::black_box(i))
