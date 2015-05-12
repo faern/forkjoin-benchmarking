@@ -24,10 +24,10 @@ pub fn par_nqueens_summa(b: &mut Bencher, threads: usize, &i: &usize) {
     });
 }
 
-const NQUEENS_SEARCH: Algorithm<(Board,usize), Board> = Algorithm {
-    fun: nqueens_task_search,
-    style: AlgoStyle::Search,
-};
+// const NQUEENS_SEARCH: Algorithm<(Board,usize), Board> = Algorithm {
+//     fun: nqueens_task_search,
+//     style: AlgoStyle::Search,
+// };
 
 const NQUEENS_SUMMA: Algorithm<(Board,usize), Solutions> = Algorithm {
     fun: nqueens_task_summa,
@@ -38,22 +38,22 @@ pub type Queen = usize;
 pub type Board = Vec<Queen>;
 pub type Solutions = Vec<Board>;
 
-fn nqueens_task_search((q, n): (Board, usize)) -> TaskResult<(Board,usize), Board> {
-    if q.len() == n {
-        TaskResult::Done(q)
-    } else {
-        let mut fork_args: Vec<(Board, usize)> = vec![];
-        for i in 0..n {
-            let mut q2 = q.clone();
-            q2.push(i);
-
-            if ok(&q2[..]) {
-                fork_args.push((q2, n));
-            }
-        }
-        TaskResult::Fork(fork_args, None)
-    }
-}
+// fn nqueens_task_search((q, n): (Board, usize)) -> TaskResult<(Board,usize), Board> {
+//     if q.len() == n {
+//         TaskResult::Done(q)
+//     } else {
+//         let mut fork_args: Vec<(Board, usize)> = vec![];
+//         for i in 0..n {
+//             let mut q2 = q.clone();
+//             q2.push(i);
+//
+//             if ok(&q2[..]) {
+//                 fork_args.push((q2, n));
+//             }
+//         }
+//         TaskResult::Fork(fork_args, None)
+//     }
+// }
 
 fn nqueens_task_summa((q, n): (Board, usize)) -> TaskResult<(Board,usize), Solutions> {
     if q.len() == n {

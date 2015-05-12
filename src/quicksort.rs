@@ -69,7 +69,7 @@ pub fn create_vec_rnd(mut x: usize, d: &mut [usize]) {
 
 fn quicksort_task(d: &mut [usize]) -> TaskResult<&mut [usize], ()> {
     let len = d.len();
-    if len <= 100 {
+    if len <= 1000 {
         quicksort_seq(d);
         TaskResult::Done(())
     } else {

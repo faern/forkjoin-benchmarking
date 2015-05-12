@@ -12,6 +12,7 @@ mod fib;
 mod quicksort;
 mod nqueens;
 // mod sumtree;
+mod spawnpool;
 
 //use std::time::duration::Duration;
 
@@ -23,8 +24,8 @@ use std::convert::AsRef;
 use fib::{seqfib, parfib, seqfib_spam};
 use quicksort::{create_vec_rnd, seq_qsort, par_qsort};
 use nqueens::{seq_nqueens_summa, par_nqueens_summa};
-// use quicksort::{seq_qsort_sorted, par_qsort_t1_sorted, par_qsort_t4_sorted};
-// use quicksort::{seq_qsort_rnd, par_qsort_t1_rnd, par_qsort_t4_rnd};
+use spawnpool::{spawn, spawn_drop, spawn_schedule_drop};
+
 // use sumtree::{seq_sumtree_balanced, par_sumtree_balanced_t1, par_sumtree_balanced_t4};
 // use sumtree::{seq_sumtree_unbalanced, par_sumtree_unbalanced_t1, par_sumtree_unbalanced_t4};
 
@@ -65,6 +66,9 @@ fn main() {
 
     for function in functions {
         match function.as_ref() {
+            "spawn" => bench_spawn(&mut criterion, &threads),
+            "spawn_drop" => bench_spawn_drop(&mut criterion, &threads),
+            "spawn_schedule_drop" => bench_spawn_schedule_drop(&mut criterion, &threads),
             "fib" => bench_fib(&mut criterion, &fib_args, &threads),
             "seqfib_spam" => bench_seqfib_spam(&mut criterion, &fib_args, &threads),
             "qsort" => bench_qsort(&mut criterion, &qsort_args, &threads),
@@ -72,6 +76,33 @@ fn main() {
             other => panic!("Invalid function to benchmark: {}", other),
         }
     }
+}
+
+fn bench_spawn(criterion: &mut Criterion, threads: &[usize]) {
+    let mut funs: Vec<Fun<usize>> = Vec::new();
+    for &t in threads.iter() {
+        funs.push(Fun::new(&format!("T{}", t), move |b,_| spawn(b, t)));
+    }
+
+    criterion.bench_compare_implementations("spawn", funs, &0);
+}
+
+fn bench_spawn_drop(criterion: &mut Criterion, threads: &[usize]) {
+    let mut funs: Vec<Fun<usize>> = Vec::new();
+    for &t in threads.iter() {
+        funs.push(Fun::new(&format!("T{}", t), move |b,_| spawn_drop(b, t)));
+    }
+
+    criterion.bench_compare_implementations("spawn_drop", funs, &0);
+}
+
+fn bench_spawn_schedule_drop(criterion: &mut Criterion, threads: &[usize]) {
+    let mut funs: Vec<Fun<usize>> = Vec::new();
+    for &t in threads.iter() {
+        funs.push(Fun::new(&format!("T{}", t), move |b,_| spawn_schedule_drop(b, t)));
+    }
+
+    criterion.bench_compare_implementations("spawn_schedule_drop", funs, &0);
 }
 
 fn bench_fib(criterion: &mut Criterion, args: &[usize], threads: &[usize]) {
