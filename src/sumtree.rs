@@ -21,6 +21,17 @@ pub fn par_sumtree(b: &mut Bencher, threads: usize, tree: &Tree) {
     });
 }
 
+pub fn par_sumtree_once(threads: usize, tree: &Tree) -> usize {
+    let forkpool = ForkPool::with_threads(threads);
+    let sumpool = forkpool.init_algorithm(Algorithm {
+        fun: sum_tree_task,
+        style: AlgoStyle::Summa(SummaStyle::Arg(sum_tree_join)),
+    });
+
+    let job = sumpool.schedule(test::black_box(tree));
+    job.recv().unwrap()
+}
+
 #[derive(Debug)]
 pub struct Tree {
     value: usize,
@@ -69,15 +80,15 @@ pub fn gen_unbalanced_tree(depth: usize) -> Tree {
     }
 }
 
-fn gen_balanced_tree(depth: usize) -> Tree {
-    let mut children = vec![];
-    if depth > 0 {
-        for _ in 0..2 {
-            children.push(gen_balanced_tree(depth-1));
-        }
-    }
-    Tree {
-        value: depth + 1000,
-        children: children,
-    }
-}
+// fn gen_balanced_tree(depth: usize) -> Tree {
+//     let mut children = vec![];
+//     if depth > 0 {
+//         for _ in 0..2 {
+//             children.push(gen_balanced_tree(depth-1));
+//         }
+//     }
+//     Tree {
+//         value: depth + 1000,
+//         children: children,
+//     }
+// }

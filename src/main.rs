@@ -7,6 +7,7 @@ extern crate test;
 extern crate criterion;
 extern crate argparse;
 extern crate forkjoin;
+extern crate time;
 
 mod fib;
 mod quicksort;
@@ -19,14 +20,12 @@ use criterion::{Criterion,Fun};
 use argparse::{ArgumentParser,Store,List};
 use std::convert::AsRef;
 
-use fib::{seqfib, parfib, seqfib_spam};
-use quicksort::{create_vec_rnd, seq_qsort, par_qsort};
+use fib::{seqfib, parfib, seqfib_spam, parfib_once};
+use quicksort::{create_vec_rnd, verify_sorted, seq_qsort, par_qsort, par_qsort_once};
 use nqueens::{seq_nqueens_summa, par_nqueens_summa};
 use spawnpool::{spawn, spawn_drop, spawn_schedule_drop};
-use sumtree::{gen_unbalanced_tree, seq_sumtree, par_sumtree};
+use sumtree::{gen_unbalanced_tree, seq_sumtree, par_sumtree, par_sumtree_once};
 
-// use sumtree::{seq_sumtree_balanced, par_sumtree_balanced_t1, par_sumtree_balanced_t4};
-// use sumtree::{seq_sumtree_unbalanced, par_sumtree_unbalanced_t1, par_sumtree_unbalanced_t4};
 
 fn main() {
     let mut samples: usize = 25;
@@ -75,6 +74,9 @@ fn main() {
             "qsort" => bench_qsort(&mut criterion, &qsort_args, &threads),
             "nqueens_summa" => bench_nqueens_summa(&mut criterion, &nqueens_args, &threads),
             "sumtree" => bench_sumtree(&mut criterion, &sumtree_args, &threads),
+            "fib_once" => fib_once(&fib_args, &threads),
+            "qsort_once" => qsort_once(&qsort_args, &threads),
+            "sumtree_once" => sumtree_once(&sumtree_args, &threads),
             other => panic!("Invalid function to benchmark: {}", other),
         }
     }
@@ -169,4 +171,61 @@ fn bench_sumtree(criterion: &mut Criterion, args: &[usize], threads: &[usize]) {
 
         criterion.bench_compare_implementations(&format!("sumtree_{}", arg), funs, arg);
     }
+}
+
+fn time_once<F: FnMut()>(mut f: F) {
+    let start = time::precise_time_ns();
+    f();
+    let end = time::precise_time_ns();
+    let elapsed = end - start;
+    println!("Timing: {}", format(elapsed));
+}
+
+fn format(ns: u64) -> String {
+    let prefix = ["ns", "us", "ms", "s"];
+    let mut prefix_i = 0;
+    let mut t: f64 = ns as f64;
+    while t > 1000.0 && prefix_i < prefix.len() {
+        t /= 1000.0;
+        prefix_i += 1;
+    }
+    format!("{:.2} {}", t, prefix[prefix_i])
+}
+
+fn fib_once(args: &[usize], threads: &[usize]) {
+    for &arg in args {
+        for &t in threads {
+            println!("Running fib({})/T{}", arg, t);
+            time_once(|| {parfib_once(t, arg);});
+        }
+        println!("");
+    }
+    println!("");
+}
+
+fn qsort_once(args: &[usize], threads: &[usize]) {
+    for &arg in args {
+        let mut data: Vec<usize> = (0..arg).collect();
+        for &t in threads {
+            create_vec_rnd(893475343, &mut data[..]);
+
+            println!("Running qsort({})/T{}", arg, t);
+            time_once(|| par_qsort_once(t, &mut data[..]));
+            verify_sorted(&data[..]);
+        }
+        println!("");
+    }
+    println!("");
+}
+
+fn sumtree_once(args: &[usize], threads: &[usize]) {
+    for &arg in args {
+        let tree = gen_unbalanced_tree(arg);
+        for &t in threads {
+            println!("Running sumtree({})/T{}", arg, t);
+            time_once(|| drop(par_sumtree_once(t, &tree)));
+        }
+        println!("");
+    }
+    println!("");
 }

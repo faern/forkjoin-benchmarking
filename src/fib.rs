@@ -41,6 +41,14 @@ pub fn parfib(b: &mut Bencher, threads: usize, &i: &usize) {
     })
 }
 
+pub fn parfib_once(threads: usize, i: usize) -> usize {
+    let forkpool = ForkPool::with_threads(threads);
+    let fibpool = forkpool.init_algorithm(FIB);
+
+    let job = fibpool.schedule(test::black_box(i));
+    job.recv().unwrap()
+}
+
 const FIB: Algorithm<usize, usize> = Algorithm {
     fun: fib_task,
     style: AlgoStyle::Summa(SummaStyle::NoArg(fib_join)),

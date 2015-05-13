@@ -46,7 +46,17 @@ pub fn seq_qsort<F>(b: &mut Bencher, size: usize, datafun: F) where
     mem::forget(data_verify);
 }
 
-fn verify_sorted(data: &[usize]) {
+pub fn par_qsort_once(threads: usize, data: &mut [usize]) {
+    let forkpool = ForkPool::with_threads(threads);
+    let sortpool = forkpool.init_algorithm(Algorithm {
+        fun: quicksort_task,
+        style: AlgoStyle::Summa(SummaStyle::NoArg(quicksort_join)),
+    });
+    let job = sortpool.schedule(data);
+    job.recv().unwrap();
+}
+
+pub fn verify_sorted(data: &[usize]) {
     if data.len() > 0 {
         let mut last = data[0];
         for d in data {
