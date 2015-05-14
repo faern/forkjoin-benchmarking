@@ -24,7 +24,7 @@ use fib::{seqfib, parfib, seqfib_spam, parfib_once};
 use quicksort::{create_vec_rnd, verify_sorted, seq_qsort, par_qsort, par_qsort_once};
 use nqueens::{seq_nqueens_summa, par_nqueens_summa, par_nqueens_summa_once};
 use spawnpool::{spawn, spawn_drop, spawn_schedule_drop};
-use sumtree::{gen_unbalanced_tree, seq_sumtree, par_sumtree, par_sumtree_once};
+use sumtree::{gen_unbalanced_tree, seq_sumtree, seq_sumtree_iter, par_sumtree, par_sumtree_once};
 
 
 fn main() {
@@ -164,6 +164,7 @@ fn bench_sumtree(criterion: &mut Criterion, args: &[usize], threads: &[usize]) {
         let tree2 = tree.clone();
 
         let mut funs: Vec<Fun<usize>> = Vec::new();
+        funs.push(Fun::new("seqiter", move |b,_| seq_sumtree_iter(b, &tree2)));
         funs.push(Fun::new("seq", move |b,_| seq_sumtree(b, &tree2)));
         for &t in threads.iter() {
             let tree_clone = tree.clone();
