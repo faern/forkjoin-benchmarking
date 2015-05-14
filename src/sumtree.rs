@@ -52,8 +52,8 @@ impl Clone for Tree {
     }
 }
 
-fn sum_tree_seq_iters(t: &Tree) -> usize {
-    t.value + t.children.iter().fold(0, |acc, t2| acc + sum_tree_seq_iters(t2))
+fn sum_tree_seq_iter(t: &Tree) -> usize {
+    t.value + t.children.iter().fold(0, |acc, t2| acc + sum_tree_seq_iter(t2))
 }
 
 fn sum_tree_seq(t: &Tree) -> usize {
