@@ -24,6 +24,15 @@ pub fn par_nqueens_summa(b: &mut Bencher, threads: usize, &i: &usize) {
     });
 }
 
+pub fn par_nqueens_summa_once(threads: usize, i: usize) {
+    let forkpool = ForkPool::with_threads(threads);
+    let queenpool = forkpool.init_algorithm(NQUEENS_SUMMA);
+
+    let empty = vec![];
+    let job = queenpool.schedule(test::black_box((empty, i)));
+    drop(test::black_box(job.recv().unwrap()));
+}
+
 // const NQUEENS_SEARCH: Algorithm<(Board,usize), Board> = Algorithm {
 //     fun: nqueens_task_search,
 //     style: AlgoStyle::Search,

@@ -22,7 +22,7 @@ use std::convert::AsRef;
 
 use fib::{seqfib, parfib, seqfib_spam, parfib_once};
 use quicksort::{create_vec_rnd, verify_sorted, seq_qsort, par_qsort, par_qsort_once};
-use nqueens::{seq_nqueens_summa, par_nqueens_summa};
+use nqueens::{seq_nqueens_summa, par_nqueens_summa, par_nqueens_summa_once};
 use spawnpool::{spawn, spawn_drop, spawn_schedule_drop};
 use sumtree::{gen_unbalanced_tree, seq_sumtree, par_sumtree, par_sumtree_once};
 
@@ -76,6 +76,7 @@ fn main() {
             "sumtree" => bench_sumtree(&mut criterion, &sumtree_args, &threads),
             "fib_once" => fib_once(&fib_args, &threads),
             "qsort_once" => qsort_once(&qsort_args, &threads),
+            "nqueens_summa_once" => nqueens_summa_once(&nqueens_args, &threads),
             "sumtree_once" => sumtree_once(&sumtree_args, &threads),
             other => panic!("Invalid function to benchmark: {}", other),
         }
@@ -212,6 +213,17 @@ fn qsort_once(args: &[usize], threads: &[usize]) {
             println!("Running qsort({})/T{}", arg, t);
             time_once(|| par_qsort_once(t, &mut data[..]));
             verify_sorted(&data[..]);
+        }
+        println!("");
+    }
+    println!("");
+}
+
+fn nqueens_summa_once(args: &[usize], threads: &[usize]) {
+    for &arg in args {
+        for &t in threads {
+            println!("Running nqueens_summa({})/T{}", arg, t);
+            time_once(|| par_nqueens_summa_once(t, arg));
         }
         println!("");
     }
