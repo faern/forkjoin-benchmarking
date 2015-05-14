@@ -162,10 +162,11 @@ fn bench_sumtree(criterion: &mut Criterion, args: &[usize], threads: &[usize]) {
     for arg in args {
         let tree = gen_unbalanced_tree(*arg);
         let tree2 = tree.clone();
+        let tree3 = tree.clone();
 
         let mut funs: Vec<Fun<usize>> = Vec::new();
         funs.push(Fun::new("seqiter", move |b,_| seq_sumtree_iter(b, &tree2)));
-        funs.push(Fun::new("seq", move |b,_| seq_sumtree(b, &tree2)));
+        funs.push(Fun::new("seq", move |b,_| seq_sumtree(b, &tree3)));
         for &t in threads.iter() {
             let tree_clone = tree.clone();
             funs.push(Fun::new(&format!("T{}", t), move |b,_| par_sumtree(b, t, &tree_clone)));
