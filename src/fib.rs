@@ -1,5 +1,5 @@
 use criterion::Bencher;
-use forkjoin::{TaskResult,ForkPool,AlgoStyle,SummaStyle,Algorithm};
+use forkjoin::{FJData,TaskResult,ForkPool,AlgoStyle,ReduceStyle,Algorithm};
 use test;
 
 use std::thread::{self,JoinGuard};
@@ -51,11 +51,11 @@ pub fn parfib_once(threads: usize, i: usize) -> usize {
 
 const FIB: Algorithm<usize, usize> = Algorithm {
     fun: fib_task,
-    style: AlgoStyle::Summa(SummaStyle::NoArg(fib_join)),
+    style: AlgoStyle::Reduce(ReduceStyle::NoArg(fib_join)),
 };
 
-fn fib_task(n: usize) -> TaskResult<usize, usize> {
-    if n <= 20 {
+fn fib_task(n: usize, fj: FJData) -> TaskResult<usize, usize> {
+    if n <= 20 || fj.depth > fj.workers {
         TaskResult::Done(fib(n))
     } else {
         TaskResult::Fork(vec![n-1,n-2], None)

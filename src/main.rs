@@ -22,7 +22,7 @@ use std::convert::AsRef;
 
 use fib::{seqfib, parfib, seqfib_spam, parfib_once};
 use quicksort::{create_vec_rnd, verify_sorted, seq_qsort, par_qsort, par_qsort_once};
-use nqueens::{seq_nqueens_summa, par_nqueens_summa, par_nqueens_summa_once};
+use nqueens::{seq_nqueens_reduce, par_nqueens_reduce, par_nqueens_search, par_nqueens_reduce_once};
 use spawnpool::{spawn, spawn_drop, spawn_schedule_drop};
 use sumtree::{gen_unbalanced_tree, seq_sumtree, par_sumtree, par_sumtree_once};
 
@@ -72,11 +72,12 @@ fn main() {
             "fib" => bench_fib(&mut criterion, &fib_args, &threads),
             "seqfib_spam" => bench_seqfib_spam(&mut criterion, &fib_args, &threads),
             "qsort" => bench_qsort(&mut criterion, &qsort_args, &threads),
-            "nqueens_summa" => bench_nqueens_summa(&mut criterion, &nqueens_args, &threads),
+            "nqueens_reduce" => bench_nqueens_reduce(&mut criterion, &nqueens_args, &threads),
+            "nqueens_search" => bench_nqueens_search(&mut criterion, &nqueens_args, &threads),
             "sumtree" => bench_sumtree(&mut criterion, &sumtree_args, &threads),
             "fib_once" => fib_once(&fib_args, &threads),
             "qsort_once" => qsort_once(&qsort_args, &threads),
-            "nqueens_summa_once" => nqueens_summa_once(&nqueens_args, &threads),
+            "nqueens_reduce_once" => nqueens_reduce_once(&nqueens_args, &threads),
             "sumtree_once" => sumtree_once(&sumtree_args, &threads),
             other => panic!("Invalid function to benchmark: {}", other),
         }
@@ -146,15 +147,27 @@ fn bench_qsort(criterion: &mut Criterion, args: &[usize], threads: &[usize]) {
     }
 }
 
-fn bench_nqueens_summa(criterion: &mut Criterion, args: &[usize], threads: &[usize]) {
+fn bench_nqueens_reduce(criterion: &mut Criterion, args: &[usize], threads: &[usize]) {
     for arg in args {
         let mut funs: Vec<Fun<usize>> = Vec::new();
-        funs.push(Fun::new("seq", move |b,i| seq_nqueens_summa(b, i)));
+        funs.push(Fun::new("seq", move |b,i| seq_nqueens_reduce(b, i)));
         for &t in threads.iter() {
-            funs.push(Fun::new(&format!("T{}", t), move |b,i| par_nqueens_summa(b, t, i)));
+            funs.push(Fun::new(&format!("T{}", t), move |b,i| par_nqueens_reduce(b, t, i)));
         }
 
-        criterion.bench_compare_implementations(&format!("nqueens_summa_{}", arg), funs, arg);
+        criterion.bench_compare_implementations(&format!("nqueens_reduce_{}", arg), funs, arg);
+    }
+}
+
+fn bench_nqueens_search(criterion: &mut Criterion, args: &[usize], threads: &[usize]) {
+    for arg in args {
+        let mut funs: Vec<Fun<usize>> = Vec::new();
+        funs.push(Fun::new("seq", move |b,i| seq_nqueens_reduce(b, i))); // Sequential only exists in reduce style for now
+        for &t in threads.iter() {
+            funs.push(Fun::new(&format!("T{}", t), move |b,i| par_nqueens_search(b, t, i)));
+        }
+
+        criterion.bench_compare_implementations(&format!("nqueens_search_{}", arg), funs, arg);
     }
 }
 
@@ -219,11 +232,11 @@ fn qsort_once(args: &[usize], threads: &[usize]) {
     println!("");
 }
 
-fn nqueens_summa_once(args: &[usize], threads: &[usize]) {
+fn nqueens_reduce_once(args: &[usize], threads: &[usize]) {
     for &arg in args {
         for &t in threads {
-            println!("Running nqueens_summa({})/T{}", arg, t);
-            time_once(|| par_nqueens_summa_once(t, arg));
+            println!("Running nqueens_reduce({})/T{}", arg, t);
+            time_once(|| par_nqueens_reduce_once(t, arg));
         }
         println!("");
     }

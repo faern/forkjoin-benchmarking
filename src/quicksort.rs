@@ -1,5 +1,5 @@
 use criterion::Bencher;
-use forkjoin::{TaskResult,ForkPool,AlgoStyle,SummaStyle,Algorithm};
+use forkjoin::{FJData,TaskResult,ForkPool,AlgoStyle,ReduceStyle,Algorithm};
 use std::mem;
 
 pub fn par_qsort<F>(b: &mut Bencher, threads: usize, size: usize, datafun: F) where
@@ -15,7 +15,7 @@ pub fn par_qsort<F>(b: &mut Bencher, threads: usize, size: usize, datafun: F) wh
         let forkpool = ForkPool::with_threads(threads);
         let sortpool = forkpool.init_algorithm(Algorithm {
             fun: quicksort_task,
-            style: AlgoStyle::Summa(SummaStyle::NoArg(quicksort_join)),
+            style: AlgoStyle::Reduce(ReduceStyle::NoArg(quicksort_join)),
         });
         let job = sortpool.schedule(&mut data_bench[..]);
         job.recv().unwrap()
@@ -50,7 +50,7 @@ pub fn par_qsort_once(threads: usize, data: &mut [usize]) {
     let forkpool = ForkPool::with_threads(threads);
     let sortpool = forkpool.init_algorithm(Algorithm {
         fun: quicksort_task,
-        style: AlgoStyle::Summa(SummaStyle::NoArg(quicksort_join)),
+        style: AlgoStyle::Reduce(ReduceStyle::NoArg(quicksort_join)),
     });
     let job = sortpool.schedule(data);
     job.recv().unwrap();
@@ -77,7 +77,7 @@ pub fn create_vec_rnd(mut x: usize, d: &mut [usize]) {
     }
 }
 
-fn quicksort_task(d: &mut [usize]) -> TaskResult<&mut [usize], ()> {
+fn quicksort_task(d: &mut [usize], _: FJData) -> TaskResult<&mut [usize], ()> {
     let len = d.len();
     if len <= 1000 {
         quicksort_seq(d);

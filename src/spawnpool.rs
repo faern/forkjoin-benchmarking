@@ -1,5 +1,5 @@
 use criterion::Bencher;
-use forkjoin::{TaskResult,ForkPool,AlgoStyle,SummaStyle,Algorithm};
+use forkjoin::{FJData,TaskResult,ForkPool,AlgoStyle,ReduceStyle,Algorithm};
 use test;
 
 pub fn spawn(b: &mut Bencher, threads: usize) {
@@ -23,7 +23,7 @@ pub fn spawn_schedule_drop(b: &mut Bencher, threads: usize) {
         let forkpool: ForkPool<usize, ()> = ForkPool::with_threads(test::black_box(threads));
         let voidpool = forkpool.init_algorithm(Algorithm {
             fun: void_task,
-            style: AlgoStyle::Summa(SummaStyle::NoArg(void_join)),
+            style: AlgoStyle::Reduce(ReduceStyle::NoArg(void_join)),
         });
 
         let job = voidpool.schedule(0);
@@ -31,7 +31,7 @@ pub fn spawn_schedule_drop(b: &mut Bencher, threads: usize) {
     });
 }
 
-fn void_task(_: usize) -> TaskResult<usize, ()> {
+fn void_task(_: usize, _: FJData) -> TaskResult<usize, ()> {
     TaskResult::Done(())
 }
 

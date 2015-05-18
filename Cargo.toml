@@ -6,15 +6,15 @@ authors = ["Linus Färnstrand <faern@faern.net>"]
 [dependencies]
 argparse = "*"
 time = "*"
-# forkjoin = "2.*"
+forkjoin = "2.*"
 
 [dependencies.criterion]
 git = "https://github.com/faern/criterion.rs"
 # path = "../criterion/criterion.rs/"
-branch = "filestat"
+branch = "develop"
 
-[dependencies.forkjoin]
-path = "../forkjoin.v2/"
+# [dependencies.forkjoin]
+# path = "../forkjoin.v2/"
 # features = ["threadstats"]
 
 # [profile.release]

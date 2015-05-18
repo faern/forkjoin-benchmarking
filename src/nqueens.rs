@@ -1,19 +1,19 @@
 use criterion::Bencher;
-use forkjoin::{ForkPool,TaskResult,AlgoStyle,SummaStyle,Algorithm};
+use forkjoin::{FJData,ForkPool,TaskResult,AlgoStyle,ReduceStyle,Algorithm};
 use test;
 
-pub fn seq_nqueens_summa(b: &mut Bencher, &i: &usize) {
+pub fn seq_nqueens_reduce(b: &mut Bencher, &i: &usize) {
     b.iter(|| {
         let empty = vec![];
-        nqueens_summa(test::black_box(&empty[..]), test::black_box(i))
+        nqueens_reduce(test::black_box(&empty[..]), test::black_box(i))
     });
 }
 
-pub fn par_nqueens_summa(b: &mut Bencher, threads: usize, &i: &usize) {
+pub fn par_nqueens_reduce(b: &mut Bencher, threads: usize, &i: &usize) {
     let forkpool = ForkPool::with_threads(threads);
-    let queenpool = forkpool.init_algorithm(NQUEENS_SUMMA);
+    let queenpool = forkpool.init_algorithm(NQUEENS_REDUCE);
 
-    let expected_result = nqueens_summa(&vec![][..], i);
+    let expected_result = nqueens_reduce(&vec![][..], i);
 
     b.iter_with_setup_and_verify(|| {}, |()| {
         let empty = vec![];
@@ -24,47 +24,66 @@ pub fn par_nqueens_summa(b: &mut Bencher, threads: usize, &i: &usize) {
     });
 }
 
-pub fn par_nqueens_summa_once(threads: usize, i: usize) {
+pub fn par_nqueens_search(b: &mut Bencher, threads: usize, &i: &usize) {
     let forkpool = ForkPool::with_threads(threads);
-    let queenpool = forkpool.init_algorithm(NQUEENS_SUMMA);
+    let queenpool = forkpool.init_algorithm(NQUEENS_SEARCH);
+
+    let expected_result = nqueens_reduce(&vec![][..], i);
+
+    b.iter_with_setup_and_verify(|| {}, |()| {
+        let empty = vec![];
+        let job = queenpool.schedule(test::black_box((empty, i)));
+        let mut solutions = vec![];
+        while let Ok(solution) = job.recv() {
+            solutions.push(solution);
+        }
+        solutions
+    }, |solutions| {
+        assert_eq!(expected_result.len(), solutions.len());
+    });
+}
+
+pub fn par_nqueens_reduce_once(threads: usize, i: usize) {
+    let forkpool = ForkPool::with_threads(threads);
+    let queenpool = forkpool.init_algorithm(NQUEENS_REDUCE);
 
     let empty = vec![];
     let job = queenpool.schedule(test::black_box((empty, i)));
     drop(test::black_box(job.recv().unwrap()));
 }
 
-// const NQUEENS_SEARCH: Algorithm<(Board,usize), Board> = Algorithm {
-//     fun: nqueens_task_search,
-//     style: AlgoStyle::Search,
-// };
+const NQUEENS_SEARCH: Algorithm<(Board,usize), Board> = Algorithm {
+    fun: nqueens_task_search,
+    style: AlgoStyle::Search,
+};
 
-const NQUEENS_SUMMA: Algorithm<(Board,usize), Solutions> = Algorithm {
-    fun: nqueens_task_summa,
-    style: AlgoStyle::Summa(SummaStyle::NoArg(nqueens_join)),
+const NQUEENS_REDUCE: Algorithm<(Board,usize), Solutions> = Algorithm {
+    fun: nqueens_task_reduce,
+    style: AlgoStyle::Reduce(ReduceStyle::NoArg(nqueens_join)),
 };
 
 pub type Queen = usize;
 pub type Board = Vec<Queen>;
 pub type Solutions = Vec<Board>;
 
-// fn nqueens_task_search((q, n): (Board, usize)) -> TaskResult<(Board,usize), Board> {
-//     if q.len() == n {
-//         TaskResult::Done(q)
-//     } else {
-//         let mut fork_args: Vec<(Board, usize)> = vec![];
-//         for i in 0..n {
-//             let mut q2 = q.clone();
-//             q2.push(i);
-//
-//             if ok(&q2[..]) {
-//                 fork_args.push((q2, n));
-//             }
-//         }
-//         TaskResult::Fork(fork_args, None)
-//     }
-// }
+fn nqueens_task_search((q, n): (Board, usize), _: FJData) -> TaskResult<(Board,usize), Board> {
+    if q.len() == n {
+        TaskResult::Done(q)
+    } else {
+        let mut fork_args: Vec<(Board, usize)> = vec![];
+        for i in 0..n {
+            let mut q2 = q.clone();
+            q2.push(i);
 
-fn nqueens_task_summa((q, n): (Board, usize)) -> TaskResult<(Board,usize), Solutions> {
+            if ok(&q2[..]) {
+                fork_args.push((q2, n));
+            }
+        }
+        TaskResult::Fork(fork_args, None)
+    }
+}
+
+fn nqueens_task_reduce((q, n): (Board, usize), _: FJData) -> TaskResult<(Board,usize), Solutions> {
     if q.len() == n {
         TaskResult::Done(vec![q])
     } else {
@@ -107,7 +126,7 @@ fn nqueens_join(values: &[Solutions]) -> Solutions {
 //     solutions
 // }
 
-fn nqueens_summa(q: &[Queen], n: usize) -> Solutions {
+fn nqueens_reduce(q: &[Queen], n: usize) -> Solutions {
     if q.len() == n && ok(q) {
         return vec![q.to_vec()];
     }
@@ -118,7 +137,7 @@ fn nqueens_summa(q: &[Queen], n: usize) -> Solutions {
         let new_q = &q2[..];
 
         if ok(new_q) {
-            let more_solutions = nqueens_summa(new_q, n);
+            let more_solutions = nqueens_reduce(new_q, n);
             solutions.push_all(&more_solutions[..]);
         }
     }
