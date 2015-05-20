@@ -65,7 +65,7 @@ const FIB: Algorithm<usize, usize> = Algorithm {
 };
 
 fn fib_task(n: usize, fj: FJData) -> TaskResult<usize, usize> {
-    if n <= 20 || 2usize.pow(fj.depth as u32) >= 100*fj.workers {
+    if n <= 20 || fj.depth >= fj.workers {
         TaskResult::Done(fib(n))
     } else {
         TaskResult::Fork(vec![n-1,n-2], None)
