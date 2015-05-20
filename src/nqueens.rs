@@ -127,7 +127,7 @@ fn nqueens_join(values: &[Solutions]) -> Solutions {
 // }
 
 fn nqueens_reduce(q: &[Queen], n: usize) -> Solutions {
-    if q.len() == n && ok(q) {
+    if q.len() == n {
         return vec![q.to_vec()];
     }
     let mut solutions: Solutions = vec![];
