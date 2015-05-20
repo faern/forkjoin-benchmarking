@@ -41,6 +41,16 @@ pub fn parfib(b: &mut Bencher, threads: usize, &i: &usize) {
     })
 }
 
+pub fn parfib_no_threshold(b: &mut Bencher, threads: usize, &i: &usize) {
+    let forkpool = ForkPool::with_threads(threads);
+    let fibpool = forkpool.init_algorithm(FIB_NO_THRESHOLD);
+
+    b.iter_with_large_drop(|| {
+        let job = fibpool.schedule(test::black_box(i));
+        job.recv().unwrap()
+    })
+}
+
 pub fn parfib_once(threads: usize, i: usize) -> usize {
     let forkpool = ForkPool::with_threads(threads);
     let fibpool = forkpool.init_algorithm(FIB);
@@ -57,6 +67,19 @@ const FIB: Algorithm<usize, usize> = Algorithm {
 fn fib_task(n: usize, fj: FJData) -> TaskResult<usize, usize> {
     if n <= 20 || fj.depth > fj.workers {
         TaskResult::Done(fib(n))
+    } else {
+        TaskResult::Fork(vec![n-1,n-2], None)
+    }
+}
+
+const FIB_NO_THRESHOLD: Algorithm<usize, usize> = Algorithm {
+    fun: fib_task_no_threshold,
+    style: AlgoStyle::Reduce(ReduceStyle::NoArg(fib_join)),
+};
+
+fn fib_task_no_threshold(n: usize, _: FJData) -> TaskResult<usize, usize> {
+    if n < 2 {
+        TaskResult::Done(1)
     } else {
         TaskResult::Fork(vec![n-1,n-2], None)
     }

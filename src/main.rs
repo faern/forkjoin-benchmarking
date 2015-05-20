@@ -20,7 +20,7 @@ use criterion::{Criterion,Fun};
 use argparse::{ArgumentParser,Store,List};
 use std::convert::AsRef;
 
-use fib::{seqfib, parfib, seqfib_spam, parfib_once};
+use fib::{seqfib, parfib, parfib_no_threshold, seqfib_spam, parfib_once};
 use quicksort::{create_vec_rnd, verify_sorted, seq_qsort, par_qsort, par_qsort_once};
 use nqueens::{seq_nqueens_reduce, par_nqueens_reduce, par_nqueens_search, par_nqueens_reduce_once};
 use spawnpool::{spawn, spawn_drop, spawn_schedule_drop};
@@ -70,6 +70,7 @@ fn main() {
             "spawn_drop" => bench_spawn_drop(&mut criterion, &threads),
             "spawn_schedule_drop" => bench_spawn_schedule_drop(&mut criterion, &threads),
             "fib" => bench_fib(&mut criterion, &fib_args, &threads),
+            "fib_no_threshold" => bench_fib_no_threshold(&mut criterion, &fib_args, &threads),
             "seqfib_spam" => bench_seqfib_spam(&mut criterion, &fib_args, &threads),
             "qsort" => bench_qsort(&mut criterion, &qsort_args, &threads),
             "nqueens_reduce" => bench_nqueens_reduce(&mut criterion, &nqueens_args, &threads),
@@ -120,6 +121,18 @@ fn bench_fib(criterion: &mut Criterion, args: &[usize], threads: &[usize]) {
         }
 
         criterion.bench_compare_implementations(&format!("fib_{}", arg), funs, arg);
+    }
+}
+
+fn bench_fib_no_threshold(criterion: &mut Criterion, args: &[usize], threads: &[usize]) {
+    for arg in args {
+        let mut funs: Vec<Fun<usize>> = Vec::new();
+        funs.push(Fun::new("seq", |b,i| seqfib(b, i)));
+        for &t in threads.iter() {
+            funs.push(Fun::new(&format!("T{}", t), move |b,i| parfib_no_threshold(b, t, i)));
+        }
+
+        criterion.bench_compare_implementations(&format!("fib_no_threshold_{}", arg), funs, arg);
     }
 }
 
