@@ -1,5 +1,5 @@
 use criterion::Bencher;
-use forkjoin::{FJData,TaskResult,ForkPool,AlgoStyle,ReduceStyle,Algorithm};
+use forkjoin::{TaskResult,ForkPool,AlgoStyle,ReduceStyle,Algorithm};
 use test;
 
 pub fn spawn(b: &mut Bencher, threads: usize) {
@@ -31,7 +31,7 @@ pub fn spawn_schedule_drop(b: &mut Bencher, threads: usize) {
     });
 }
 
-fn void_task(_: usize, _: FJData) -> TaskResult<usize, ()> {
+fn void_task(_: usize, _: usize) -> TaskResult<usize, ()> {
     TaskResult::Done(())
 }
 

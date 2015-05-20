@@ -1,5 +1,5 @@
 use criterion::Bencher;
-use forkjoin::{FJData,TaskResult,ForkPool,AlgoStyle,ReduceStyle,Algorithm};
+use forkjoin::{TaskResult,ForkPool,AlgoStyle,ReduceStyle,Algorithm};
 use test;
 
 use std::thread::{self,JoinGuard};
@@ -64,8 +64,8 @@ const FIB: Algorithm<usize, usize> = Algorithm {
     style: AlgoStyle::Reduce(ReduceStyle::NoArg(fib_join)),
 };
 
-fn fib_task(n: usize, fj: FJData) -> TaskResult<usize, usize> {
-    if n <= 20 || fj.depth >= fj.workers {
+fn fib_task(n: usize, _: usize) -> TaskResult<usize, usize> {
+    if n <= 20 {
         TaskResult::Done(fib(n))
     } else {
         TaskResult::Fork(vec![n-1,n-2], None)
@@ -77,7 +77,7 @@ const FIB_NO_THRESHOLD: Algorithm<usize, usize> = Algorithm {
     style: AlgoStyle::Reduce(ReduceStyle::NoArg(fib_join)),
 };
 
-fn fib_task_no_threshold(n: usize, _: FJData) -> TaskResult<usize, usize> {
+fn fib_task_no_threshold(n: usize, _: usize) -> TaskResult<usize, usize> {
     if n < 2 {
         TaskResult::Done(1)
     } else {

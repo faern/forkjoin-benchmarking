@@ -1,5 +1,5 @@
 use criterion::Bencher;
-use forkjoin::{FJData,TaskResult,ForkPool,AlgoStyle,ReduceStyle,Algorithm};
+use forkjoin::{TaskResult,ForkPool,AlgoStyle,ReduceStyle,Algorithm};
 use std::mem;
 
 pub fn par_qsort<F>(b: &mut Bencher, threads: usize, size: usize, datafun: F) where
@@ -77,7 +77,7 @@ pub fn create_vec_rnd(mut x: usize, d: &mut [usize]) {
     }
 }
 
-fn quicksort_task(d: &mut [usize], _: FJData) -> TaskResult<&mut [usize], ()> {
+fn quicksort_task(d: &mut [usize], _: usize) -> TaskResult<&mut [usize], ()> {
     let len = d.len();
     if len <= 1000 {
         quicksort_seq(d);

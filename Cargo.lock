@@ -4,7 +4,7 @@ version = "0.1.0"
 dependencies = [
  "argparse 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "criterion 0.0.0 (git+https://github.com/faern/criterion.rs?branch=develop)",
- "forkjoin 2.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "forkjoin 2.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "time 0.1.25 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
@@ -87,7 +87,7 @@ dependencies = [
 
 [[package]]
 name = "forkjoin"
-version = "2.2.0"
+version = "2.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "deque 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)",

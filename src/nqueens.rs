@@ -1,5 +1,5 @@
 use criterion::Bencher;
-use forkjoin::{FJData,ForkPool,TaskResult,AlgoStyle,ReduceStyle,Algorithm};
+use forkjoin::{ForkPool,TaskResult,AlgoStyle,ReduceStyle,Algorithm};
 use test;
 
 pub fn seq_nqueens_reduce(b: &mut Bencher, &i: &usize) {
@@ -66,7 +66,7 @@ pub type Queen = usize;
 pub type Board = Vec<Queen>;
 pub type Solutions = Vec<Board>;
 
-fn nqueens_task_search((q, n): (Board, usize), _: FJData) -> TaskResult<(Board,usize), Board> {
+fn nqueens_task_search((q, n): (Board, usize), _: usize) -> TaskResult<(Board,usize), Board> {
     if q.len() == n {
         TaskResult::Done(q)
     } else {
@@ -83,7 +83,7 @@ fn nqueens_task_search((q, n): (Board, usize), _: FJData) -> TaskResult<(Board,u
     }
 }
 
-fn nqueens_task_reduce((q, n): (Board, usize), _: FJData) -> TaskResult<(Board,usize), Solutions> {
+fn nqueens_task_reduce((q, n): (Board, usize), _: usize) -> TaskResult<(Board,usize), Solutions> {
     if q.len() == n {
         TaskResult::Done(vec![q])
     } else {
