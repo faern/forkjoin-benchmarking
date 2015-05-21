@@ -17,10 +17,10 @@ mod spawnpool;
 
 use criterion::{Criterion,Fun};
 
-use argparse::{ArgumentParser,Store,List};
+use argparse::{ArgumentParser,Store,List,StoreFalse};
 use std::convert::AsRef;
 
-use fib::{seqfib, parfib, parfib_no_threshold, seqfib_spam, parfib_once};
+use fib::{seqfib, parfib, parfib_no_threshold, seqfib_spam, parfib_once, parfib_no_threshold_once};
 use quicksort::{create_vec_rnd, verify_sorted, seq_qsort, par_qsort, par_qsort_once};
 use nqueens::{seq_nqueens_reduce, par_nqueens_reduce, par_nqueens_search, par_nqueens_reduce_once};
 use spawnpool::{spawn, spawn_drop, spawn_schedule_drop};
@@ -34,6 +34,7 @@ fn main() {
     let mut qsort_args: Vec<usize> = vec![0, 20000];
     let mut nqueens_args: Vec<usize> = vec![8];
     let mut sumtree_args: Vec<usize> = vec![12];
+    let mut seq: bool = true;
 
     let mut functions: Vec<String> = vec![];
 
@@ -47,6 +48,7 @@ fn main() {
         ap.refer(&mut qsort_args).add_option(&["--qsort"], List, "Size of lists to sort by quicksort");
         ap.refer(&mut nqueens_args).add_option(&["--nqueens"], List, "Size of chessboard");
         ap.refer(&mut sumtree_args).add_option(&["--sumtree"], List, "Depth of tree in sumtree");
+        ap.refer(&mut seq).add_option(&["--noseq"], StoreFalse, "Disable running of sequential algorithms");
         ap.refer(&mut functions).add_argument("functions", List, "List of functions to benchmark").required();
 
         ap.parse_args_or_exit();
@@ -69,14 +71,15 @@ fn main() {
             "spawn" => bench_spawn(&mut criterion, &threads),
             "spawn_drop" => bench_spawn_drop(&mut criterion, &threads),
             "spawn_schedule_drop" => bench_spawn_schedule_drop(&mut criterion, &threads),
-            "fib" => bench_fib(&mut criterion, &fib_args, &threads),
-            "fib_no_threshold" => bench_fib_no_threshold(&mut criterion, &fib_args, &threads),
+            "fib" => bench_fib(&mut criterion, &fib_args, &threads, seq),
+            "fib_no_threshold" => bench_fib_no_threshold(&mut criterion, &fib_args, &threads, seq),
             "seqfib_spam" => bench_seqfib_spam(&mut criterion, &fib_args, &threads),
-            "qsort" => bench_qsort(&mut criterion, &qsort_args, &threads),
-            "nqueens_reduce" => bench_nqueens_reduce(&mut criterion, &nqueens_args, &threads),
-            "nqueens_search" => bench_nqueens_search(&mut criterion, &nqueens_args, &threads),
-            "sumtree" => bench_sumtree(&mut criterion, &sumtree_args, &threads),
+            "qsort" => bench_qsort(&mut criterion, &qsort_args, &threads, seq),
+            "nqueens_reduce" => bench_nqueens_reduce(&mut criterion, &nqueens_args, &threads, seq),
+            "nqueens_search" => bench_nqueens_search(&mut criterion, &nqueens_args, &threads, seq),
+            "sumtree" => bench_sumtree(&mut criterion, &sumtree_args, &threads, seq),
             "fib_once" => fib_once(&fib_args, &threads),
+            "fib_no_threshold_once" => fib_no_threshold_once(&fib_args, &threads),
             "qsort_once" => qsort_once(&qsort_args, &threads),
             "nqueens_reduce_once" => nqueens_reduce_once(&nqueens_args, &threads),
             "sumtree_once" => sumtree_once(&sumtree_args, &threads),
@@ -112,10 +115,10 @@ fn bench_spawn_schedule_drop(criterion: &mut Criterion, threads: &[usize]) {
     criterion.bench_compare_implementations("spawn_schedule_drop", funs, &0);
 }
 
-fn bench_fib(criterion: &mut Criterion, args: &[usize], threads: &[usize]) {
+fn bench_fib(criterion: &mut Criterion, args: &[usize], threads: &[usize], seq: bool) {
     for arg in args {
         let mut funs: Vec<Fun<usize>> = Vec::new();
-        funs.push(Fun::new("seq", |b,i| seqfib(b, i)));
+        if seq {funs.push(Fun::new("seq", |b,i| seqfib(b, i)));}
         for &t in threads.iter() {
             funs.push(Fun::new(&format!("T{}", t), move |b,i| parfib(b, t, i)));
         }
@@ -124,10 +127,10 @@ fn bench_fib(criterion: &mut Criterion, args: &[usize], threads: &[usize]) {
     }
 }
 
-fn bench_fib_no_threshold(criterion: &mut Criterion, args: &[usize], threads: &[usize]) {
+fn bench_fib_no_threshold(criterion: &mut Criterion, args: &[usize], threads: &[usize], seq: bool) {
     for arg in args {
         let mut funs: Vec<Fun<usize>> = Vec::new();
-        funs.push(Fun::new("seq", |b,i| seqfib(b, i)));
+        if seq {funs.push(Fun::new("seq", |b,i| seqfib(b, i)));}
         for &t in threads.iter() {
             funs.push(Fun::new(&format!("T{}", t), move |b,i| parfib_no_threshold(b, t, i)));
         }
@@ -147,11 +150,11 @@ fn bench_seqfib_spam(criterion: &mut Criterion, args: &[usize], threads: &[usize
     }
 }
 
-fn bench_qsort(criterion: &mut Criterion, args: &[usize], threads: &[usize]) {
+fn bench_qsort(criterion: &mut Criterion, args: &[usize], threads: &[usize], seq: bool) {
     let seed = 893475343;
     for arg in args {
         let mut funs: Vec<Fun<usize>> = Vec::new();
-        funs.push(Fun::new("seq", move |b,i| seq_qsort(b, *i, move |d| create_vec_rnd(seed, d))));
+        if seq {funs.push(Fun::new("seq", move |b,i| seq_qsort(b, *i, move |d| create_vec_rnd(seed, d))));}
         for &t in threads.iter() {
             funs.push(Fun::new(&format!("T{}", t), move |b,i| par_qsort(b, t, *i, move |d| create_vec_rnd(seed, d))));
         }
@@ -160,10 +163,10 @@ fn bench_qsort(criterion: &mut Criterion, args: &[usize], threads: &[usize]) {
     }
 }
 
-fn bench_nqueens_reduce(criterion: &mut Criterion, args: &[usize], threads: &[usize]) {
+fn bench_nqueens_reduce(criterion: &mut Criterion, args: &[usize], threads: &[usize], seq: bool) {
     for arg in args {
         let mut funs: Vec<Fun<usize>> = Vec::new();
-        funs.push(Fun::new("seq", move |b,i| seq_nqueens_reduce(b, i)));
+        if seq {funs.push(Fun::new("seq", move |b,i| seq_nqueens_reduce(b, i)));}
         for &t in threads.iter() {
             funs.push(Fun::new(&format!("T{}", t), move |b,i| par_nqueens_reduce(b, t, i)));
         }
@@ -172,10 +175,10 @@ fn bench_nqueens_reduce(criterion: &mut Criterion, args: &[usize], threads: &[us
     }
 }
 
-fn bench_nqueens_search(criterion: &mut Criterion, args: &[usize], threads: &[usize]) {
+fn bench_nqueens_search(criterion: &mut Criterion, args: &[usize], threads: &[usize], seq: bool) {
     for arg in args {
         let mut funs: Vec<Fun<usize>> = Vec::new();
-        funs.push(Fun::new("seq", move |b,i| seq_nqueens_reduce(b, i))); // Sequential only exists in reduce style for now
+        if seq {funs.push(Fun::new("seq", move |b,i| seq_nqueens_reduce(b, i)));} // Sequential only exists in reduce style for now
         for &t in threads.iter() {
             funs.push(Fun::new(&format!("T{}", t), move |b,i| par_nqueens_search(b, t, i)));
         }
@@ -184,13 +187,13 @@ fn bench_nqueens_search(criterion: &mut Criterion, args: &[usize], threads: &[us
     }
 }
 
-fn bench_sumtree(criterion: &mut Criterion, args: &[usize], threads: &[usize]) {
+fn bench_sumtree(criterion: &mut Criterion, args: &[usize], threads: &[usize], seq: bool) {
     for arg in args {
         let tree = gen_unbalanced_tree(*arg);
         let tree2 = tree.clone();
 
         let mut funs: Vec<Fun<usize>> = Vec::new();
-        funs.push(Fun::new("seq", move |b,_| seq_sumtree(b, &tree2)));
+        if seq {funs.push(Fun::new("seq", move |b,_| seq_sumtree(b, &tree2)));}
         for &t in threads.iter() {
             let tree_clone = tree.clone();
             funs.push(Fun::new(&format!("T{}", t), move |b,_| par_sumtree(b, t, &tree_clone)));
@@ -224,6 +227,17 @@ fn fib_once(args: &[usize], threads: &[usize]) {
         for &t in threads {
             println!("Running fib({})/T{}", arg, t);
             time_once(|| {parfib_once(t, arg);});
+        }
+        println!("");
+    }
+    println!("");
+}
+
+fn fib_no_threshold_once(args: &[usize], threads: &[usize]) {
+    for &arg in args {
+        for &t in threads {
+            println!("Running fib_no_threshold({})/T{}", arg, t);
+            time_once(|| {parfib_no_threshold_once(t, arg);});
         }
         println!("");
     }
