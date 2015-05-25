@@ -50,7 +50,7 @@ fn sum_tree_seq(t: &Tree) -> usize {
     t.value + t.children.iter().fold(0, |acc, t2| acc + sum_tree_seq(t2))
 }
 
-fn sum_tree_task(t: &Tree, _: usize) -> TaskResult<&Tree, usize> {
+fn sum_tree_task(t: &Tree) -> TaskResult<&Tree, usize> {
     if t.children.is_empty() {
         TaskResult::Done(t.value)
     } else {

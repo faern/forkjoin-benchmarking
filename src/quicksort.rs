@@ -2,6 +2,8 @@ use criterion::Bencher;
 use forkjoin::{TaskResult,ForkPool,AlgoStyle,ReduceStyle,Algorithm};
 use std::mem;
 
+use sortutils::verify_sorted;
+
 pub fn par_qsort<F>(b: &mut Bencher, threads: usize, size: usize, datafun: F) where
     F: Fn(&mut [usize])
 {
@@ -56,28 +58,7 @@ pub fn par_qsort_once(threads: usize, data: &mut [usize]) {
     job.recv().unwrap();
 }
 
-pub fn verify_sorted(data: &[usize]) {
-    if data.len() > 0 {
-        let mut last = data[0];
-        for d in data {
-            assert!(last <= *d);
-            last = *d;
-        }
-    }
-}
-
-pub fn create_vec_rnd(mut x: usize, d: &mut [usize]) {
-    let mut i = 0;
-    let n = d.len();
-    while i < n {
-        let num = (i * n ^ x) % n;
-        d[i] = num;
-        x ^= i*num;
-        i += 1;
-    }
-}
-
-fn quicksort_task(d: &mut [usize], _: usize) -> TaskResult<&mut [usize], ()> {
+fn quicksort_task(d: &mut [usize]) -> TaskResult<&mut [usize], ()> {
     let len = d.len();
     if len <= 1000 {
         quicksort_seq(d);
@@ -93,7 +74,7 @@ fn quicksort_task(d: &mut [usize], _: usize) -> TaskResult<&mut [usize], ()> {
 
 fn quicksort_join(_: &[()]) -> () {}
 
-fn quicksort_seq(d: &mut [usize]) {
+pub fn quicksort_seq(d: &mut [usize]) {
     if d.len() > 1 {
         let pivot = partition(d);
 

@@ -31,7 +31,7 @@ pub fn spawn_schedule_drop(b: &mut Bencher, threads: usize) {
     });
 }
 
-fn void_task(_: usize, _: usize) -> TaskResult<usize, ()> {
+fn void_task(_: usize) -> TaskResult<usize, ()> {
     TaskResult::Done(())
 }
 

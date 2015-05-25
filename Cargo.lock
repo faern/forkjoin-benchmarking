@@ -88,10 +88,10 @@ dependencies = [
 [[package]]
 name = "forkjoin"
 version = "2.3.0"
-source = "git+https://github.com/faern/forkjoin?branch=feature/optimizefork#2787ca88b3d9783f1e1eefcea3ae647ebec5b118"
+source = "git+https://github.com/faern/forkjoin?branch=feature/optimizefork#651cf22d699ada5056fb7c1ab66af4d9a2754a4a"
 dependencies = [
  "deque 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "num_cpus 0.2.5 (registry+https://github.com/rust-lang/crates.io-index)",
+ "num_cpus 0.2.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "rand 0.3.8 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
@@ -115,7 +115,7 @@ dependencies = [
 
 [[package]]
 name = "num_cpus"
-version = "0.2.5"
+version = "0.2.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "libc 0.1.8 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -171,7 +171,7 @@ dependencies = [
  "blas 0.0.0 (git+https://github.com/japaric/blas.rs)",
  "cast 0.0.0 (git+https://github.com/japaric/cast.rs)",
  "float 0.0.0 (git+https://github.com/japaric/float.rs)",
- "num_cpus 0.2.5 (registry+https://github.com/rust-lang/crates.io-index)",
+ "num_cpus 0.2.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "rand 0.3.8 (registry+https://github.com/rust-lang/crates.io-index)",
  "simd 0.0.0 (git+https://github.com/japaric/simd.rs)",
 ]

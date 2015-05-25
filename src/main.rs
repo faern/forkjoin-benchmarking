@@ -2,6 +2,8 @@
 #![feature(test)]
 #![feature(scoped)]
 #![feature(collections)]
+#![feature(unique)] // For mergesort
+#![allow(mutable_transmutes)]
 
 extern crate test;
 extern crate criterion;
@@ -11,17 +13,21 @@ extern crate time;
 
 mod fib;
 mod quicksort;
+mod mergesort;
 mod nqueens;
 mod sumtree;
 mod spawnpool;
+mod sortutils;
 
 use criterion::{Criterion,Fun};
 
 use argparse::{ArgumentParser,Store,List,StoreFalse};
 use std::convert::AsRef;
 
+use sortutils::{verify_sorted, create_vec_rnd};
 use fib::{seqfib, parfib, parfib_no_threshold, seqfib_spam, parfib_once, parfib_no_threshold_once};
-use quicksort::{create_vec_rnd, verify_sorted, seq_qsort, par_qsort, par_qsort_once};
+use quicksort::{seq_qsort, par_qsort, par_qsort_once};
+use mergesort::{seq_mergesort, par_mergesort, par_mergesort_once};
 use nqueens::{seq_nqueens_reduce, par_nqueens_reduce, par_nqueens_search, par_nqueens_reduce_once};
 use spawnpool::{spawn, spawn_drop, spawn_schedule_drop};
 use sumtree::{gen_unbalanced_tree, seq_sumtree, par_sumtree, par_sumtree_once};
@@ -31,7 +37,7 @@ fn main() {
     let mut samples: usize = 25;
     let mut threads: Vec<usize> = vec![1,2,4];
     let mut fib_args: Vec<usize> = vec![31];
-    let mut qsort_args: Vec<usize> = vec![0, 20000];
+    let mut sort_args: Vec<usize> = vec![0, 20000];
     let mut nqueens_args: Vec<usize> = vec![8];
     let mut sumtree_args: Vec<usize> = vec![12];
     let mut seq: bool = true;
@@ -45,7 +51,7 @@ fn main() {
         ap.refer(&mut samples).add_option(&["-s", "--samples"], Store, "Number of samples to collect for each benchmark");
         ap.refer(&mut threads).add_option(&["-t", "--threads"], List, "Number of threads to run on");
         ap.refer(&mut fib_args).add_option(&["--fib"], List, "Arguments to fib");
-        ap.refer(&mut qsort_args).add_option(&["--qsort"], List, "Size of lists to sort by quicksort");
+        ap.refer(&mut sort_args).add_option(&["--sort"], List, "Size of lists to sort by quicksort");
         ap.refer(&mut nqueens_args).add_option(&["--nqueens"], List, "Size of chessboard");
         ap.refer(&mut sumtree_args).add_option(&["--sumtree"], List, "Depth of tree in sumtree");
         ap.refer(&mut seq).add_option(&["--noseq"], StoreFalse, "Disable running of sequential algorithms");
@@ -57,7 +63,7 @@ fn main() {
     println!("Number of samples: {}", samples);
     println!("Threads: {:?}", threads);
     println!("Fib arguments: {:?}", fib_args);
-    println!("Quicksort arguments: {:?}", qsort_args);
+    println!("Sorting vector sizes: {:?}", sort_args);
     println!("Nqueens arguments: {:?}", nqueens_args);
     println!("Sumtree depths: {:?}", sumtree_args);
     println!("Benchmarked functions: {:?}", functions);
@@ -74,13 +80,15 @@ fn main() {
             "fib" => bench_fib(&mut criterion, &fib_args, &threads, seq),
             "fib_no_threshold" => bench_fib_no_threshold(&mut criterion, &fib_args, &threads, seq),
             "seqfib_spam" => bench_seqfib_spam(&mut criterion, &fib_args, &threads),
-            "qsort" => bench_qsort(&mut criterion, &qsort_args, &threads, seq),
+            "qsort" => bench_qsort(&mut criterion, &sort_args, &threads, seq),
+            "mergesort" => bench_mergesort(&mut criterion, &sort_args, &threads, seq),
             "nqueens_reduce" => bench_nqueens_reduce(&mut criterion, &nqueens_args, &threads, seq),
             "nqueens_search" => bench_nqueens_search(&mut criterion, &nqueens_args, &threads, seq),
             "sumtree" => bench_sumtree(&mut criterion, &sumtree_args, &threads, seq),
             "fib_once" => fib_once(&fib_args, &threads),
             "fib_no_threshold_once" => fib_no_threshold_once(&fib_args, &threads),
-            "qsort_once" => qsort_once(&qsort_args, &threads),
+            "qsort_once" => qsort_once(&sort_args, &threads),
+            "mergesort_once" => mergesort_once(&sort_args, &threads),
             "nqueens_reduce_once" => nqueens_reduce_once(&nqueens_args, &threads),
             "sumtree_once" => sumtree_once(&sumtree_args, &threads),
             other => panic!("Invalid function to benchmark: {}", other),
@@ -160,6 +168,19 @@ fn bench_qsort(criterion: &mut Criterion, args: &[usize], threads: &[usize], seq
         }
 
         criterion.bench_compare_implementations(&format!("qsort_{}", arg), funs, arg);
+    }
+}
+
+fn bench_mergesort(criterion: &mut Criterion, args: &[usize], threads: &[usize], seq: bool) {
+    let seed = 893475343;
+    for arg in args {
+        let mut funs: Vec<Fun<usize>> = Vec::new();
+        if seq {funs.push(Fun::new("seq", move |b,i| seq_mergesort(b, *i, move |d| create_vec_rnd(seed, d))));}
+        for &t in threads.iter() {
+            funs.push(Fun::new(&format!("T{}", t), move |b,i| par_mergesort(b, t, *i, move |d| create_vec_rnd(seed, d))));
+        }
+
+        criterion.bench_compare_implementations(&format!("mergesort_{}", arg), funs, arg);
     }
 }
 
@@ -252,6 +273,21 @@ fn qsort_once(args: &[usize], threads: &[usize]) {
 
             println!("Running qsort({})/T{}", arg, t);
             time_once(|| par_qsort_once(t, &mut data[..]));
+            verify_sorted(&data[..]);
+        }
+        println!("");
+    }
+    println!("");
+}
+
+fn mergesort_once(args: &[usize], threads: &[usize]) {
+    for &arg in args {
+        let mut data: Vec<usize> = (0..arg).collect();
+        for &t in threads {
+            create_vec_rnd(893475343, &mut data[..]);
+
+            println!("Running mergesort({})/T{}", arg, t);
+            time_once(|| par_mergesort_once(t, &mut data[..]));
             verify_sorted(&data[..]);
         }
         println!("");

@@ -72,7 +72,7 @@ const FIB: Algorithm<usize, usize> = Algorithm {
     style: AlgoStyle::Reduce(ReduceStyle::NoArg(fib_join)),
 };
 
-fn fib_task(n: usize, _: usize) -> TaskResult<usize, usize> {
+fn fib_task(n: usize) -> TaskResult<usize, usize> {
     if n <= 20 {
         TaskResult::Done(fib(n))
     } else {
@@ -85,7 +85,7 @@ const FIB_NO_THRESHOLD: Algorithm<usize, usize> = Algorithm {
     style: AlgoStyle::Reduce(ReduceStyle::NoArg(fib_join)),
 };
 
-fn fib_task_no_threshold(n: usize, _: usize) -> TaskResult<usize, usize> {
+fn fib_task_no_threshold(n: usize) -> TaskResult<usize, usize> {
     if n < 2 {
         TaskResult::Done(1)
     } else {

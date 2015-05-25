@@ -66,7 +66,7 @@ pub type Queen = usize;
 pub type Board = Vec<Queen>;
 pub type Solutions = Vec<Board>;
 
-fn nqueens_task_search((q, n): (Board, usize), _: usize) -> TaskResult<(Board,usize), Board> {
+fn nqueens_task_search((q, n): (Board, usize)) -> TaskResult<(Board,usize), Board> {
     if q.len() == n {
         TaskResult::Done(q)
     } else {
@@ -83,7 +83,7 @@ fn nqueens_task_search((q, n): (Board, usize), _: usize) -> TaskResult<(Board,us
     }
 }
 
-fn nqueens_task_reduce((q, n): (Board, usize), _: usize) -> TaskResult<(Board,usize), Solutions> {
+fn nqueens_task_reduce((q, n): (Board, usize)) -> TaskResult<(Board,usize), Solutions> {
     if q.len() == n {
         TaskResult::Done(vec![q])
     } else {

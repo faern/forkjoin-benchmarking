@@ -17,7 +17,6 @@ branch = "develop"
 # path = "../forkjoin.v2/"
 git = "https://github.com/faern/forkjoin"
 branch = "feature/optimizefork"
-# features = ["threadstats"]
 
 # [profile.release]
 # lto = true
