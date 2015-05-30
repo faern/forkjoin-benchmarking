@@ -125,26 +125,24 @@ fn test_mergesort_seq() {
 }
 
 fn merge (xs1: &mut [usize], xs2: &mut [usize]) {
-    let (l1, l2) = (xs1.len(), xs2.len());
-    let len = l1+l2;
+    let (len1, len2) = (xs1.len(), xs2.len());
+    let len = len1+len2;
     let (mut il, mut ir) = (0, 0);
-    let mut i = 0;
 
     let mut buf: Vec<usize> = Vec::with_capacity(len);
 
-    while i < len {
-        if il < l1 && (ir >= l2 || xs1[il] <= xs2[ir]) {
+    for _ in 0..len {
+        if il < len1 && (ir >= len2 || xs1[il] <= xs2[ir]) {
             buf.push(xs1[il]);
             il = il + 1;
         } else {
             buf.push(xs2[ir]);
             ir = ir + 1;
         }
-        i = i + 1;
     }
     unsafe {
-        ptr::copy(buf.as_ptr(), xs1.as_mut_ptr(), l1);
-        ptr::copy(buf.as_ptr().offset(l1 as isize), xs2.as_mut_ptr(), l2);
+        ptr::copy(buf.as_ptr(), xs1.as_mut_ptr(), len1);
+        ptr::copy(buf.as_ptr().offset(len1 as isize), xs2.as_mut_ptr(), len2);
     }
 }
 
