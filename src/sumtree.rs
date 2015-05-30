@@ -66,27 +66,41 @@ fn sum_tree_join(value: &usize, values: &[usize]) -> usize {
     *value + values.iter().fold(0, |acc, &v| acc + v)
 }
 
-/// Generate a very unbalanced tree
+/// Generate a very unbalanced tree. 23 = 8 388 608 nodes
 pub fn gen_unbalanced_tree(depth: usize) -> Tree {
     let mut children = vec![];
     for i in 0..depth {
         children.push(gen_unbalanced_tree(i));
     }
     Tree {
-        value: depth + 1000,
+        value: 1,
         children: children,
     }
 }
 
-// fn gen_balanced_tree(depth: usize) -> Tree {
-//     let mut children = vec![];
-//     if depth > 0 {
-//         for _ in 0..2 {
-//             children.push(gen_balanced_tree(depth-1));
-//         }
-//     }
-//     Tree {
-//         value: depth + 1000,
-//         children: children,
-//     }
-// }
+pub fn gen_list_tree(depth: usize) -> Tree {
+    let mut tree = Tree {
+        value: 1,
+        children: vec![],
+    };
+    for _ in 0..depth {
+        tree = Tree {
+            value: 1,
+            children: vec![tree],
+        };
+    }
+    tree
+}
+
+pub fn gen_balanced_tree(depth: usize) -> Tree {
+    let mut children = vec![];
+    if depth > 0 {
+        for _ in 0..2 {
+            children.push(gen_balanced_tree(depth-1));
+        }
+    }
+    Tree {
+        value: 1,
+        children: children,
+    }
+}

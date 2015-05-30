@@ -9,6 +9,13 @@ pub fn seq_nqueens_reduce(b: &mut Bencher, &i: &usize) {
     });
 }
 
+pub fn seq_nqueens_search(b: &mut Bencher, &i: &usize) {
+    b.iter(|| {
+        let empty = vec![];
+        nqueens_search(test::black_box(&empty[..]), test::black_box(i))
+    });
+}
+
 pub fn par_nqueens_reduce(b: &mut Bencher, threads: usize, &i: &usize) {
     let forkpool = ForkPool::with_threads(threads);
     let queenpool = forkpool.init_algorithm(NQUEENS_REDUCE);
@@ -40,6 +47,22 @@ pub fn par_nqueens_search(b: &mut Bencher, threads: usize, &i: &usize) {
         solutions
     }, |solutions| {
         assert_eq!(expected_result.len(), solutions.len());
+    });
+}
+
+pub fn par_nqueens_search_first(b: &mut Bencher, threads: usize, &i: &usize) {
+    let forkpool = ForkPool::with_threads(threads);
+    let queenpool = forkpool.init_algorithm(NQUEENS_SEARCH);
+
+    b.iter_with_setup_and_verify(|| {}, |()| {
+        let empty = vec![];
+        let job = queenpool.schedule(test::black_box((empty, i)));
+        let solution: Board = job.recv().unwrap();
+        (solution, job)
+    }, |(solution, job)| {
+        assert!(ok(&solution[..]));
+        //queenpool.discard_all();
+        drop(job);
     });
 }
 
@@ -108,23 +131,24 @@ fn nqueens_join(values: &[Solutions]) -> Solutions {
     all_solutions
 }
 
-// fn nqueens_search(q: &[Queen], n: usize) -> Board {
-//     if q.len() == n && ok(q) {
-//         return vec![q.to_vec()];
-//     }
-//     let mut solutions: Solutions = vec![];
-//     for i in 0..n {
-//         let mut q2 = q.to_vec();
-//         q2.push(i);
-//         let new_q = &q2[..];
-//
-//         if ok(new_q) {
-//             let more_solutions = nqueens_search(new_q, n);
-//             solutions.push_all(&more_solutions[..]);
-//         }
-//     }
-//     solutions
-// }
+fn nqueens_search(q: &[Queen], n: usize) -> Option<Board> {
+    if q.len() == n {
+        return Some(q.to_vec());
+    }
+    for i in 0..n {
+        let mut q2 = q.to_vec();
+        q2.push(i);
+        let new_q = &q2[..];
+
+        if ok(new_q) {
+            let solution = nqueens_search(new_q, n);
+            if solution.is_some() {
+                return solution;
+            }
+        }
+    }
+    return None;
+}
 
 fn nqueens_reduce(q: &[Queen], n: usize) -> Solutions {
     if q.len() == n {

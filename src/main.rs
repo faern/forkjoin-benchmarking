@@ -28,9 +28,9 @@ use sortutils::{verify_sorted, create_vec_rnd};
 use fib::{seqfib, parfib, parfib_no_threshold, seqfib_spam, parfib_once, parfib_no_threshold_once};
 use quicksort::{seq_qsort, par_qsort, par_qsort_once};
 use mergesort::{seq_mergesort, par_mergesort, par_mergesort_once};
-use nqueens::{seq_nqueens_reduce, par_nqueens_reduce, par_nqueens_search, par_nqueens_reduce_once};
+use nqueens::{seq_nqueens_reduce, seq_nqueens_search, par_nqueens_reduce, par_nqueens_search, par_nqueens_search_first, par_nqueens_reduce_once};
 use spawnpool::{spawn, spawn_drop, spawn_schedule_drop};
-use sumtree::{gen_unbalanced_tree, seq_sumtree, par_sumtree, par_sumtree_once};
+use sumtree::{gen_unbalanced_tree, gen_list_tree, gen_balanced_tree, seq_sumtree, par_sumtree, par_sumtree_once};
 
 
 fn main() {
@@ -84,13 +84,18 @@ fn main() {
             "mergesort" => bench_mergesort(&mut criterion, &sort_args, &threads, seq),
             "nqueens_reduce" => bench_nqueens_reduce(&mut criterion, &nqueens_args, &threads, seq),
             "nqueens_search" => bench_nqueens_search(&mut criterion, &nqueens_args, &threads, seq),
-            "sumtree" => bench_sumtree(&mut criterion, &sumtree_args, &threads, seq),
+            "nqueens_search_first" => bench_nqueens_search_first(&mut criterion, &nqueens_args, &threads, seq),
+            "sumtree_unbalanced" => bench_sumtree_unbalanced(&mut criterion, &sumtree_args, &threads, seq),
+            "sumtree_list" => bench_sumtree_listtree(&mut criterion, &sumtree_args, &threads, seq),
+            "sumtree_balanced" => bench_sumtree_balanced(&mut criterion, &sumtree_args, &threads, seq),
             "fib_once" => fib_once(&fib_args, &threads),
             "fib_no_threshold_once" => fib_no_threshold_once(&fib_args, &threads),
             "qsort_once" => qsort_once(&sort_args, &threads),
             "mergesort_once" => mergesort_once(&sort_args, &threads),
             "nqueens_reduce_once" => nqueens_reduce_once(&nqueens_args, &threads),
-            "sumtree_once" => sumtree_once(&sumtree_args, &threads),
+            "sumtree_unbalanced_once" => sumtree_unbalanced_once(&sumtree_args, &threads),
+            "sumtree_list_once" => sumtree_listtree_once(&sumtree_args, &threads),
+            "sumtree_balanced_once" => sumtree_balanced_once(&sumtree_args, &threads),
             other => panic!("Invalid function to benchmark: {}", other),
         }
     }
@@ -208,7 +213,19 @@ fn bench_nqueens_search(criterion: &mut Criterion, args: &[usize], threads: &[us
     }
 }
 
-fn bench_sumtree(criterion: &mut Criterion, args: &[usize], threads: &[usize], seq: bool) {
+fn bench_nqueens_search_first(criterion: &mut Criterion, args: &[usize], threads: &[usize], seq: bool) {
+    for arg in args {
+        let mut funs: Vec<Fun<usize>> = Vec::new();
+        if seq {funs.push(Fun::new("seq", move |b,i| seq_nqueens_search(b, i)));} // Sequential only exists in reduce style for now
+        for &t in threads.iter() {
+            funs.push(Fun::new(&format!("T{}", t), move |b,i| par_nqueens_search_first(b, t, i)));
+        }
+
+        criterion.bench_compare_implementations(&format!("nqueens_search_first_{}", arg), funs, arg);
+    }
+}
+
+fn bench_sumtree_unbalanced(criterion: &mut Criterion, args: &[usize], threads: &[usize], seq: bool) {
     for arg in args {
         let tree = gen_unbalanced_tree(*arg);
         let tree2 = tree.clone();
@@ -220,7 +237,39 @@ fn bench_sumtree(criterion: &mut Criterion, args: &[usize], threads: &[usize], s
             funs.push(Fun::new(&format!("T{}", t), move |b,_| par_sumtree(b, t, &tree_clone)));
         }
 
-        criterion.bench_compare_implementations(&format!("sumtree_{}", arg), funs, arg);
+        criterion.bench_compare_implementations(&format!("sumtree_unbalanced_{}", arg), funs, arg);
+    }
+}
+
+fn bench_sumtree_listtree(criterion: &mut Criterion, args: &[usize], threads: &[usize], seq: bool) {
+    for arg in args {
+        let tree = gen_list_tree(*arg);
+        let tree2 = tree.clone();
+
+        let mut funs: Vec<Fun<usize>> = Vec::new();
+        if seq {funs.push(Fun::new("seq", move |b,_| seq_sumtree(b, &tree2)));}
+        for &t in threads.iter() {
+            let tree_clone = tree.clone();
+            funs.push(Fun::new(&format!("T{}", t), move |b,_| par_sumtree(b, t, &tree_clone)));
+        }
+
+        criterion.bench_compare_implementations(&format!("sumtree_listtree_{}", arg), funs, arg);
+    }
+}
+
+fn bench_sumtree_balanced(criterion: &mut Criterion, args: &[usize], threads: &[usize], seq: bool) {
+    for arg in args {
+        let tree = gen_balanced_tree(*arg);
+        let tree2 = tree.clone();
+
+        let mut funs: Vec<Fun<usize>> = Vec::new();
+        if seq {funs.push(Fun::new("seq", move |b,_| seq_sumtree(b, &tree2)));}
+        for &t in threads.iter() {
+            let tree_clone = tree.clone();
+            funs.push(Fun::new(&format!("T{}", t), move |b,_| par_sumtree(b, t, &tree_clone)));
+        }
+
+        criterion.bench_compare_implementations(&format!("sumtree_balanced_{}", arg), funs, arg);
     }
 }
 
@@ -306,11 +355,35 @@ fn nqueens_reduce_once(args: &[usize], threads: &[usize]) {
     println!("");
 }
 
-fn sumtree_once(args: &[usize], threads: &[usize]) {
+fn sumtree_unbalanced_once(args: &[usize], threads: &[usize]) {
     for &arg in args {
         let tree = gen_unbalanced_tree(arg);
         for &t in threads {
-            println!("Running sumtree({})/T{}", arg, t);
+            println!("Running sumtree_balanced({})/T{}", arg, t);
+            time_once(|| drop(par_sumtree_once(t, &tree)));
+        }
+        println!("");
+    }
+    println!("");
+}
+
+fn sumtree_listtree_once(args: &[usize], threads: &[usize]) {
+    for &arg in args {
+        let tree = gen_list_tree(arg);
+        for &t in threads {
+            println!("Running sumtree_list({})/T{}", arg, t);
+            time_once(|| drop(par_sumtree_once(t, &tree)));
+        }
+        println!("");
+    }
+    println!("");
+}
+
+fn sumtree_balanced_once(args: &[usize], threads: &[usize]) {
+    for &arg in args {
+        let tree = gen_balanced_tree(arg);
+        for &t in threads {
+            println!("Running sumtree_balanced({})/T{}", arg, t);
             time_once(|| drop(par_sumtree_once(t, &tree)));
         }
         println!("");
