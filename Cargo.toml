@@ -9,14 +9,14 @@ time = "*"
 # forkjoin = "2.3.*"
 
 [dependencies.criterion]
-git = "https://github.com/faern/criterion.rs"
-# path = "../criterion/criterion.rs/"
-branch = "develop"
+#git = "https://github.com/faern/criterion.rs"
+#branch = "develop"
+path = "../criterion/criterion.rs/"
 
 [dependencies.forkjoin]
-# path = "../forkjoin.v2/"
-git = "https://github.com/faern/forkjoin"
-branch = "feature/optimizefork"
+path = "../forkjoin/"
+#git = "https://github.com/faern/forkjoin"
+#branch = "develop"
 
 # [profile.release]
 # lto = true
