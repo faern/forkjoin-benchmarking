@@ -57,7 +57,7 @@ dependencies = [
  "criterion_macros 0.0.0",
  "log 0.3.1 (git+https://github.com/rust-lang/log)",
  "rustc-serialize 0.3.15 (git+https://github.com/rust-lang/rustc-serialize)",
- "simplot 0.0.0 (git+https://github.com/laumann/simplot.rs)",
+ "simplot 0.0.0 (git+https://github.com/brianw1/simplot.rs?branch=brianw1/master)",
  "space 0.0.0 (git+https://github.com/japaric/space.rs)",
  "stats 0.0.0 (git+https://github.com/laumann/stats.rs)",
  "time 0.1.31 (git+https://github.com/rust-lang/time)",
@@ -148,7 +148,7 @@ source = "git+https://github.com/laumann/simd.rs#aa5f036794c12a545a57218ba6d403e
 [[package]]
 name = "simplot"
 version = "0.0.0"
-source = "git+https://github.com/laumann/simplot.rs#69857016fc291c7749878a80a1867ad2168d69f8"
+source = "git+https://github.com/brianw1/simplot.rs?branch=brianw1/master#868447fd35892da0bf45fc012ff947cee3b38a76"
 dependencies = [
  "byteorder 0.3.11 (registry+https://github.com/rust-lang/crates.io-index)",
  "cast 0.0.0 (git+https://github.com/japaric/cast.rs)",
