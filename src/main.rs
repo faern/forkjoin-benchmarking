@@ -1,6 +1,5 @@
 //#![feature(std_misc)] // For Duration
 #![feature(test)]
-#![feature(scoped)]
 #![feature(unique)] // For mergesort
 #![feature(vec_push_all)]
 #![allow(mutable_transmutes)]

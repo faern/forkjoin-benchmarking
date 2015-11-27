@@ -2,20 +2,20 @@ use criterion::Bencher;
 use forkjoin::{TaskResult,ForkPool,AlgoStyle,ReduceStyle,Algorithm};
 use test;
 
-use std::thread::{self,JoinGuard};
+use std::thread::{self, JoinHandle};
 
 pub fn seqfib_spam(b: &mut Bencher, threads: usize, &i: &usize) {
     let expected_result = fib(i);
 
     b.iter_with_setup_and_verify(|| {}, |()| {
         let joins = (0..threads).map(|_| {
-            thread::scoped(move || {
+            thread::spawn(move || {
                 fib(test::black_box(i))
             })
-        }).collect::<Vec<JoinGuard<usize>>>();
+        }).collect::<Vec<JoinHandle<usize>>>();
 
         joins.into_iter().map(|join| {
-            join.join()
+            join.join().unwrap()
         }).collect::<Vec<usize>>()
     }, |results| {
         assert_eq!(threads, results.len());
