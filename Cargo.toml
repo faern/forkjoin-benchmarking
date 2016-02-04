@@ -9,17 +9,18 @@ time = "*"
 # forkjoin = "2.3.*"
 
 [dependencies.criterion]
-#git = "https://github.com/faern/criterion.rs"
-#branch = "develop"
-path = "../criterion/criterion.rs/"
+#path = "../criterion/criterion.rs/"
+git = "https://github.com/faern/criterion.rs"
+branch = "forkjoin_additions"
 
 [dependencies.forkjoin]
-path = "../forkjoin/"
-#git = "https://github.com/faern/forkjoin"
-#branch = "develop"
+#path = "../forkjoin/"
+git = "https://github.com/faern/forkjoin"
+branch = "affinity_linux"
 
 # [profile.release]
 # lto = true
 
 [features]
 threadstats = ["forkjoin/threadstats"]
+linux-affinity = ["forkjoin/linux-affinity"]

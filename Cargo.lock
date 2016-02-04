@@ -3,8 +3,8 @@ name = "forkjoin-benchmarking"
 version = "0.1.0"
 dependencies = [
  "argparse 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "criterion 0.0.0",
- "forkjoin 2.3.0",
+ "criterion 0.0.0 (git+https://github.com/faern/criterion.rs?branch=forkjoin_additions)",
+ "forkjoin 2.3.0 (git+https://github.com/faern/forkjoin?branch=affinity_linux)",
  "time 0.1.34 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
@@ -18,25 +18,9 @@ dependencies = [
 ]
 
 [[package]]
-name = "approx"
-version = "0.0.0"
-source = "git+https://github.com/japaric/approx.rs#7f3d5147ffea4dbeef8b5861b54e05dc8daf9c1e"
-dependencies = [
- "float 0.0.0 (git+https://github.com/japaric/float.rs)",
-]
-
-[[package]]
 name = "argparse"
 version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-
-[[package]]
-name = "blas"
-version = "0.0.0"
-source = "git+https://github.com/japaric/blas.rs#7386d370ca3b528900b63db91880ce14e37a7992"
-dependencies = [
- "complex 0.0.0 (git+https://github.com/japaric/complex.rs)",
-]
 
 [[package]]
 name = "byteorder"
@@ -49,39 +33,40 @@ version = "0.0.0"
 source = "git+https://github.com/japaric/cast.rs#34ee2159cc1276ecce7b8c521a81f47c907d2c63"
 
 [[package]]
-name = "complex"
-version = "0.0.0"
-source = "git+https://github.com/japaric/complex.rs#00bb0c7a2350dc2e0f2b4157ceed1f4595ec2570"
-dependencies = [
- "approx 0.0.0 (git+https://github.com/japaric/approx.rs)",
- "float 0.0.0 (git+https://github.com/japaric/float.rs)",
- "onezero 0.0.0 (git+https://github.com/japaric/onezero.rs)",
- "rand 0.3.12 (registry+https://github.com/rust-lang/crates.io-index)",
-]
-
-[[package]]
 name = "criterion"
 version = "0.0.0"
+source = "git+https://github.com/faern/criterion.rs?branch=forkjoin_additions#f905100c607fe26ac5351caf6688314a7c42aca8"
 dependencies = [
- "criterion_macros 0.0.0",
- "log 0.3.4 (git+https://github.com/rust-lang/log)",
+ "criterion_macros 0.0.0 (git+https://github.com/faern/criterion.rs?branch=forkjoin_additions)",
+ "log 0.3.5 (git+https://github.com/rust-lang/log)",
  "rustc-serialize 0.3.16 (git+https://github.com/rust-lang/rustc-serialize)",
- "simplot 0.0.0 (git+https://github.com/brianw1/simplot.rs?branch=brianw1/master)",
+ "simplot 0.0.0 (git+https://github.com/japaric/simplot.rs)",
  "space 0.0.0 (git+https://github.com/japaric/space.rs)",
- "stats 0.0.0 (git+https://github.com/faern/stats.rs)",
+ "stats 0.0.0 (git+https://github.com/japaric/stats.rs?branch=no-simd)",
  "time 0.1.34 (git+https://github.com/rust-lang/time)",
 ]
 
 [[package]]
 name = "criterion_macros"
 version = "0.0.0"
+source = "git+https://github.com/faern/criterion.rs?branch=forkjoin_additions#f905100c607fe26ac5351caf6688314a7c42aca8"
 
 [[package]]
 name = "deque"
-version = "0.2.3"
-source = "git+https://github.com/kinghajj/deque#5d7d0d8f2b363e53ce9d6e8bbb687b85d2fa5085"
+version = "0.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
- "rand 0.3.12 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rand 0.3.13 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "errno"
+version = "0.1.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+dependencies = [
+ "kernel32-sys 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "libc 0.2.6 (registry+https://github.com/rust-lang/crates.io-index)",
+ "winapi 0.2.5 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -95,11 +80,13 @@ dependencies = [
 [[package]]
 name = "forkjoin"
 version = "2.3.0"
+source = "git+https://github.com/faern/forkjoin?branch=affinity_linux#7ad21ae2a9542e7c7d559a50bce5ffa1eb5f7152"
 dependencies = [
- "deque 0.2.3 (git+https://github.com/kinghajj/deque)",
- "libc 0.2.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "deque 0.3.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "libc 0.2.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "num_cpus 0.2.10 (registry+https://github.com/rust-lang/crates.io-index)",
- "rand 0.3.12 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rand 0.3.13 (registry+https://github.com/rust-lang/crates.io-index)",
+ "scheduler 0.1.0 (git+https://github.com/faern/rust-scheduler?branch=fix_import_collision)",
  "thread-scoped 1.0.1 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
@@ -114,15 +101,15 @@ dependencies = [
 
 [[package]]
 name = "libc"
-version = "0.2.2"
+version = "0.2.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
 name = "log"
-version = "0.3.4"
-source = "git+https://github.com/rust-lang/log#d482c528d9c3349445dabb14de8fe2619b7a1b69"
+version = "0.3.5"
+source = "git+https://github.com/rust-lang/log#44ed095d8c235c7b57d3ddf0b1e4369a624b3073"
 dependencies = [
- "libc 0.2.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "libc 0.2.6 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -131,39 +118,38 @@ version = "0.2.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "kernel32-sys 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "libc 0.2.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "libc 0.2.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "winapi 0.2.5 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
-name = "onezero"
-version = "0.0.0"
-source = "git+https://github.com/japaric/onezero.rs#25aa543e559db3b49c786aaf4e3a8f286cac3f65"
-
-[[package]]
 name = "rand"
-version = "0.3.12"
+version = "0.3.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "advapi32-sys 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "libc 0.2.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "libc 0.2.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "winapi 0.2.5 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
 name = "rustc-serialize"
 version = "0.3.16"
-source = "git+https://github.com/rust-lang/rustc-serialize#08dfcf2c3ec4050f6716096b1544c75e9e594823"
+source = "git+https://github.com/rust-lang/rustc-serialize#9fee4f1bf706ee010e83559ff19c66ea72090464"
 
 [[package]]
-name = "simd"
-version = "0.0.0"
-source = "git+https://github.com/laumann/simd.rs#aa5f036794c12a545a57218ba6d403edaa57ce3e"
+name = "scheduler"
+version = "0.1.0"
+source = "git+https://github.com/faern/rust-scheduler?branch=fix_import_collision#e2e086a48224b3f7bd86708057b9984b5b39c88b"
+dependencies = [
+ "errno 0.1.6 (registry+https://github.com/rust-lang/crates.io-index)",
+ "libc 0.2.6 (registry+https://github.com/rust-lang/crates.io-index)",
+]
 
 [[package]]
 name = "simplot"
 version = "0.0.0"
-source = "git+https://github.com/brianw1/simplot.rs?branch=brianw1/master#868447fd35892da0bf45fc012ff947cee3b38a76"
+source = "git+https://github.com/japaric/simplot.rs#16c4cc5b08248ef00d5851cc3a9da71ace32fa2e"
 dependencies = [
  "byteorder 0.4.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "cast 0.0.0 (git+https://github.com/japaric/cast.rs)",
@@ -182,14 +168,12 @@ dependencies = [
 [[package]]
 name = "stats"
 version = "0.0.0"
-source = "git+https://github.com/faern/stats.rs#3d868e3c2e8c1026dd19bb028af60bf2a8e80a2d"
+source = "git+https://github.com/japaric/stats.rs?branch=no-simd#d217eab1a2f361928c966c19f1b27894421502cc"
 dependencies = [
- "blas 0.0.0 (git+https://github.com/japaric/blas.rs)",
  "cast 0.0.0 (git+https://github.com/japaric/cast.rs)",
  "float 0.0.0 (git+https://github.com/japaric/float.rs)",
  "num_cpus 0.2.10 (registry+https://github.com/rust-lang/crates.io-index)",
- "rand 0.3.12 (registry+https://github.com/rust-lang/crates.io-index)",
- "simd 0.0.0 (git+https://github.com/laumann/simd.rs)",
+ "rand 0.3.13 (registry+https://github.com/rust-lang/crates.io-index)",
  "thread-scoped 1.0.1 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
@@ -201,10 +185,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 [[package]]
 name = "time"
 version = "0.1.34"
-source = "git+https://github.com/rust-lang/time#874cad82bfe38ff19864e7d23fa0c243e594b47e"
+source = "git+https://github.com/rust-lang/time#ac188f80cf46311702c86b845fd640f449cf42c7"
 dependencies = [
  "kernel32-sys 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "libc 0.2.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "libc 0.2.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "winapi 0.2.5 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
@@ -214,7 +198,7 @@ version = "0.1.34"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "kernel32-sys 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "libc 0.2.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "libc 0.2.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "winapi 0.2.5 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
