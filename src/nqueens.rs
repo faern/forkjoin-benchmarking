@@ -126,7 +126,7 @@ fn nqueens_task_reduce((q, n): (Board, usize)) -> TaskResult<(Board,usize), Solu
 fn nqueens_join(values: &[Solutions]) -> Solutions {
     let mut all_solutions: Solutions = vec![];
     for solutions in values {
-        all_solutions.push_all(&solutions[..]);
+        all_solutions.extend_from_slice(&solutions[..]);
     }
     all_solutions
 }
@@ -162,7 +162,7 @@ fn nqueens_reduce(q: &[Queen], n: usize) -> Solutions {
 
         if ok(new_q) {
             let more_solutions = nqueens_reduce(new_q, n);
-            solutions.push_all(&more_solutions[..]);
+            solutions.extend_from_slice(&more_solutions[..]);
         }
     }
     solutions
